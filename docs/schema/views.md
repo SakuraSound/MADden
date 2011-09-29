@@ -1,6 +1,7 @@
 
-Informarion Extraction
+Information Extraction
 --------------
+
 * play.id
 * score home
 * score away
@@ -17,7 +18,7 @@ Informarion Extraction
 
 
 Models
-________
+--------------
 
 * sentiment
 * team names
