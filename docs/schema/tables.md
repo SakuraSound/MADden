@@ -25,13 +25,11 @@ Game
 Football Plays
 ---------
 
+* play id
 * game id
-* play
 * yards to go
 * scrimmage line
-* score home
-* score away
 * time remaining
 * quarter 
-
+* description
 
