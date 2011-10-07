@@ -11,5 +11,5 @@ We will explore the power of postgres and the madlib package.
 We combine Machineeen Learning and SQL to allow a user to perform interesting
 queries.
 
-We obtain data from twitter and ESPN.com play-by-play pages.
+We obtain data from twitter and CBSSports.com play-by-play pages.
 
