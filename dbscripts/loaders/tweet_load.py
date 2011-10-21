@@ -61,7 +61,7 @@ def load(jsonfile):
 		j = json.loads(line, 'utf-8')
 
 		# Don't insert null text
-		if not j["text"]:
+		if "text" not in j or not j["text"]:
 			continue
 	
 		# Don't insert if the tweet contains non-english chars
@@ -93,15 +93,24 @@ def load(jsonfile):
 		#print d['user_profile_image']
 		#print d['created_at']
 		#print d['twtext']
-
+		
 		# Perform the insertion
-		#q = __querya + ' ' + __queryb + ';'
-		#print q % d 
-		cursor.execute(q % d)
-		connection.commit()
+		q = __querya + ' ' + __queryb + ';'
+		#print q % 
+		#pairs = zip(d.keys(), d.values())
+		#pirint pairs
+		try:
+			cursor.execute(q, d)
+			connection.commit()
+		except psycopg2.IntegrityError, e:
+			cursor = connection.cursor()
+			connection.rollback()
+			print "ERROR:", e, j['id'], j['text']
 
-		if count % 10000 == 0 or count == 1:
-			print count, '|'
+			continue
+
+		if count % 1000 == 0 or count == 1:
+			print count, '|',
 		count += 1
 
 	f.close()
@@ -112,4 +121,5 @@ if __name__ == '__main__':
 		print "Usage: python tweet_load.py <file.json>"
 	else:
 		print load(sys.argv[1])
+
 
