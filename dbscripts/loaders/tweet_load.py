@@ -16,10 +16,27 @@ from datetime import datetime
 
 __host = ''
 __db = 'madlibdb'
-__port = '5432'
+__port = '`5432'
 __pwd = ''
 __user = ''
 __table = 'tweets'
+
+def _configdb():
+
+	try:
+		d = json.load(open('db.json'))
+		__host = d['host']
+		__db = d['db']
+		__port =d['port']
+		__pwd =d['pwd']
+		__user =d['user']
+		__table = d['table']
+	except:
+		print 'Error in your db.json file. Because it is in the local directory',
+		print ', you use double quotes.'
+		print 'Exiting...'
+		sys.exit()
+
 
 __connect_string = "dbname='%(db)s' user='%(user)s' host='%(server)s'\
 		password='%(pwd)s' port='%(port)s'"
@@ -58,7 +75,11 @@ def load(jsonfile):
 	for line in f.xreadlines():
 		
 		# Turn the line into json format
-		j = json.loads(line, 'utf-8')
+		j = None
+		try:
+			j = json.loads(line, 'utf-8')
+		except ValueError, e:
+			continue
 
 		# Don't insert null text
 		if "text" not in j or not j["text"]:
@@ -106,7 +127,6 @@ def load(jsonfile):
 			cursor = connection.cursor()
 			connection.rollback()
 			print "ERROR:", e, j['id'], j['text']
-
 			continue
 
 		if count % 1000 == 0 or count == 1:
@@ -119,7 +139,8 @@ def load(jsonfile):
 if __name__ == '__main__':
 	if len(sys.argv) < 1 or not os.path.isfile(sys.argv[1]):
 		print "Usage: python tweet_load.py <file.json>"
+		print "A db.json file must exist in the local path"
 	else:
+		_configdb() 
 		print load(sys.argv[1])
-
 

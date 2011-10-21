@@ -1,6 +1,10 @@
+-- DROP SEQUENCE plays_id_seq;
 CREATE SEQUENCE plays_id_seq;
-CREATE TABLE NFLPLAYS(
-	id INTEGER DEFAULT NEXTVAL ('recap_id_seq') PRIMARY KEY,
-	year INTEGER NOT NULL,
-	plays TEXT NOT NULL);
+
+--DROP TABLE nflplays; 
+CREATE TABLE nflplays ( 
+  id INTEGER DEFAULT NEXTVAL ('recap_id_seq') PRIMARY KEY,
+  year INTEGER NOT NULL,
+  plays TEXT NOT NULL
+);
 
