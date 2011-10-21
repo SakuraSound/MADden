@@ -1,0 +1,8 @@
+{
+	"host" : "localhost",
+	"db" : "madlibdb",
+	"port" : "5432",
+	"pwd" : "",
+	"user" : "",
+	"table" : "tweets"
+}
