@@ -16,44 +16,53 @@ from datetime import datetime
 
 __host = ''
 __db = 'madlibdb'
-__port = '`5432'
+__port = '5432'
 __pwd = ''
 __user = ''
-__table = 'tweets'
+__table = 'tweets' # REQUIRE: Not included in the db.json file
 
-def _configdb():
+def configdb():
+	global __host
+	global __db
+	global __port
+	global __pwd
+	global __user
 
 	try:
 		d = json.load(open('db.json'))
 		__host = d['host']
 		__db = d['db']
-		__port =d['port']
-		__pwd =d['pwd']
-		__user =d['user']
-		__table = d['table']
+		__port = d['port']
+		__pwd = d['pwd']
+		__user = d['user']
+		#__table = d['table']
+		return True
 	except:
 		print 'Error in your db.json file. Because it is in the local directory',
 		print ', you use double quotes.'
 		print 'Exiting...'
 		sys.exit()
 
+def __connect_string():
+	return "dbname='%(db)s' user='%(user)s' host='%(server)s'\
+	password='%(pwd)s' port='%(port)s'"
 
-__connect_string = "dbname='%(db)s' user='%(user)s' host='%(server)s'\
-		password='%(pwd)s' port='%(port)s'"
-
-__connect_params = {'server': __host,\
+def __connect_params():
+	return {'server': __host,\
 	'user': __user,\
 	'pwd': __pwd,\
 	'port': __port,\
 	'db': __db\
 }
 
-__querya = """INSERT INTO %(table)s \
+def __querya():
+	return """INSERT INTO %(table)s \
 (id, id_str, twuser, twuser_id_str, user_profile_image, \
 created_at, twtext, twtextvector) VALUES """ % {'table' : __table}
 
-__queryb = """ (%(id)s, %(id_str)s, %(twuser)s, \
-%(twuser_id_str)s, %(user_profile_image)s, %(created_at)s, \
+def __queryb():
+	return """ (%(id)s, %(id_str)s, %(twuser)s,\
+%(twuser_id_str)s, %(user_profile_image)s, %(created_at)s,\
 %(twtext)s, to_tsvector(%(twtextvector)s) ) """
 
 
@@ -62,7 +71,7 @@ def load(jsonfile):
 	
 	try:
 		# print __connect_string % __connect_params
-		connection = psycopg2.connect(__connect_string % __connect_params)
+		connection = psycopg2.connect(__connect_string() % __connect_params())
 	except:
 		print ("Connection to database failed")
 		return None
@@ -116,7 +125,7 @@ def load(jsonfile):
 		#print d['twtext']
 		
 		# Perform the insertion
-		q = __querya + ' ' + __queryb + ';'
+		q = "%s %s;" % (__querya(), __queryb())
 		#print q % 
 		#pairs = zip(d.keys(), d.values())
 		#pirint pairs
@@ -137,10 +146,16 @@ def load(jsonfile):
 
 
 if __name__ == '__main__':
-	if len(sys.argv) < 1 or not os.path.isfile(sys.argv[1]):
+	import pdb
+	pdb.set_trace()
+	if len(sys.argv) <= 1 or not os.path.isfile(sys.argv[1]):
 		print "Usage: python tweet_load.py <file.json>"
+		print "The file must not end with a separator"
 		print "A db.json file must exist in the local path"
 	else:
-		_configdb() 
-		print load(sys.argv[1])
+		configured = configdb() # Add the database stuff 
+		if configured:
+			print load(sys.argv[1])
+		else:
+			print 'Error did not load'
 
