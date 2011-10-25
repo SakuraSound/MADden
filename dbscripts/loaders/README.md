@@ -33,3 +33,9 @@ year, MM if hte month, DD is the day, TEAM1 and TEAM2 are
 two or three leter team name.
 
 Each file line is a description from a play.
+
+
+### nflplays\_load.py
+
+This is similar to the previous loader in structure. It inserts plays
+oin to the database.
