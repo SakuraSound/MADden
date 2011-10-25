@@ -1,0 +1,14 @@
+#!/bin/bash
+for dir in `find . -mindepth 1 -type d`
+do
+    echo "txtifying blogs in $dir"
+    cd $dir
+    for file in `find . -type f -iname '*.html'`
+    do
+        filename=$(basename $file)
+        filename=${filename%.*}
+        echo "$file"
+        lynx --dump $file >> $filename.txt
+    done
+    cd ..
+done
