@@ -1,0 +1,53 @@
+
+\section{Example Query}
+
+In this example query we demonstrate the flexibility and multi-modal 
+support of \system. The example query is shown in Query \ref{quote:main}
+
+
+\begin{quotation}
+
+Give me the \underline{best} new involving the \underline{Arizona Cardinals} 
+team and involving the player \underline{Larry Fitzgerald}.
+
+\caption{Plain text Query}
+\label{quote:main}
+\end{quotation}
+
+
+Notice Query \ref{quote:main} has three parameters expressed as underlines.
+The parameter `best' here refers to a ratio of good news to bad news.
+`Arizona Cardinals' is a professional American Football team in the National
+Football League (NFL) and `Larry Fitzgerald' is a player for that team.
+
+To answer this query, we assume we are given tables\footnote{In \system these
+tables may be extracted before hand, or defined over a foreign data wrapper}
+with the following schema:
+
+\begin{quotation}
+Player(id, name, ...)
+
+PlayerAlias(pid, nickname)
+
+Team(id, name, city)
+
+TeamAlias(teamid, nickname)
+
+BlogEntry(id, entry, title, posted\_at)
+
+Recaps(id, team1, team2, date, text) \leftarrow not needed
+
+Plays(id, playnum, team1, team2, date, text) \leftarrow not needed
+\end{quotation}
+
+
+To answer this query using a program such as R we would need to ....
+
+Using an analytics language such as R or Matlab supports a large number of 
+statistical libraries.
+
+For some corporations, sampling data is not enough.
+
+Difficult to adopt, must wait to get data 
+
+(See motivation from MADSkills paper)
