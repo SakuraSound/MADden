@@ -1,9 +1,48 @@
 
 \section{System Description}
 
+\subsection{Storage architecture}
+MADden is built to work on top of 
+both Postgres 9.1 and 
+
+\subsection{In-database statistical methods}
+In order to perform text analytics within the database,
+packages need to be in place to run at query time.
+MADden utilizes statistical functions found in the 
+MADlib library \cite{Cohen:2009:MSN:1687553.1687576}, as
+a base for text analytics. MADlib provides a 
+backbone for the text analytics functionality, including
+Naive Bayes Classification, Parallel LDA \cite{Blei:2003:LDA:944919.944937} ,
+Association Rule Mining, Sparse Vector operations, etc. 
+\subsection{Text Analytics}
+The goal then, is to build on top of the existing functionality of MADlib,
+to create a more rich environment for text analytics. This requires the 
+addition of new functionality be added in the database. This includes
+implementing the Viterbi algorithm in native SQL \cite{wang2011hybrid},
+part-of-speech tagging, CRF model discovery, Entity Resolution, 
+Sentiment analysis, and other moethods.
+
+
+
+\subsection{Query Processing}
+
+\subsection{User Interface}
+MADden provides a web-based interface for
+constructing queries. The interface allows
+users to select a vertical market (NFL, Voting, etc.),
+and a vareity of query skeletons associated with
+each market. The user can fill in the
+blank portions of the query, mad libs style, choosing
+data classes and instances to build their query. A SQL
+representation of their constructed query is presented to them,
+as well as results when they execute their query. 
+ 
+
 \subsection{Text Analysis in DBMS}
 
-In the database we implemente native analysis .
+
+In the database we implemente native analysis of textual
+data. Queries that require text
 
 We use the MADlib library \cite{Cohen:2009:MSN:1687553.1687576}.
 
