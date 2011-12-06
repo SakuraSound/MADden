@@ -1,14 +1,15 @@
 import java.io.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.*;
 
 import org.jsoup.*;
 import org.jsoup.nodes.*;
 
-/*
+/**
  * @author mhb
+ * This code is terrible ~mhb
  */
-// This code is terrible ~mhb
+
 
 
 class HTMLFilter implements FilenameFilter {
@@ -97,8 +98,7 @@ public class blagconverter {
 		long duration = end - start;
 		System.out.format("Completed in %d ns", duration);
 		
-		System.out.println("Also known as " + duration/100000000 + "sec"
-				);
+		System.out.println("Also known as " + duration/100000000 + "sec");
 	}
 	private static final void doShit(File f) throws Exception
 	{
