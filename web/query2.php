@@ -73,8 +73,57 @@
         border: 0;
       }
 
-    </style>
-	</head>
+		</style>
+		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+		<script type="text/javascript"
+			google.load('visualization', '1.0', {'packages':['corechart']});
+			google.setOnLoadCallback(drawChart);
+			function drawChart() {
+<?php
+// Build query
+
+$player1 = $_GET['player1'];
+$player2 = $_GET['player2'];
+$from1 = date("$_GET['from1']");
+$to1 = date("$_GET['to1']");
+
+$query = 
+	"(select $player1, created_at, cgrant_sentiment('twtext')".
+	"\nfrom tweets".
+	"\nwhere (created_at >= $from1 and created <= $to1)".
+	"\nand (cgrant_distance(1,'$player1',2, twtext, 5) > .5)"
+	"\nunion all".
+	"\n(select $player2, cgrant_sentiment('twtext'), created_at".
+	"\nfrom tweets".
+	"\nwhere (created_at >= $from1 and created <= $to1)".
+	"\nand (cgrant_distance(1,'$player2',2, twtext, 5) > .5)"
+	"\nlimit 100";
+
+// Connecting, selecting database
+$dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=madden options='--client_encoding=UTF8'")
+    or die('Could not connect: ' . pg_last_error());
+
+		list($tic_usec, $tic_sec) = explode(" ", microtime());
+		$result = pg_query($query) or die('Query failed: ' . pg_last_error());
+		list($toc_usec, $toc_sec) = explode(" ", microtime());
+		$querytime = $toc_sec + $toc_usec - ($tic_sec + $tic_usec);
+?>
+				var data = new google.visualizationi.DataTable();
+				data.addColumn('string', 'Player');
+				data.addColumn('date','Date');
+
+<?php
+				echo "data.addRows(".count($result).");";
+				$sent = ($line[2]=='+')?1: ($line[2]=='-')?-1:0;
+				while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
+					echo "data.setValue(\'$line[0]\',new Date($line[1]),$sent);\n";	
+				}
+?>
+				var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+				chart.draw(data, {width: 400, height: 240});
+				
+			}
+</head>
 
 	<!-- <body  onload="prettyPrint()"> -->
 	<body>
@@ -93,31 +142,6 @@
 		</div> <!-- .topbar -->
 
 		<div class="container">
-<?php
-//error_reporting(E_ALL);
-//ini_set('display_errors', '1');
-
-// Connecting, selecting database
-$dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=madden options='--client_encoding=UTF8'")
-    or die('Could not connect: ' . pg_last_error());
-
-$player = implode("&", explode(" ", $_GET["player"]));
-$sent = htmlspecialchars($_GET['sent']);
-		// Build query
-$query = "select cgrant_sentiment(twtext) as sent, twtext, twuser_id_str, id_str".
-	"\nfrom tweets ".
-	"\nwhere (cgrant_distance(1,'".$_GET['player']."',2, twtext, 5) > .5 or ".
-	" False) ".
-	//"\ntwtextvector @@ to_tsquery('".htmlspecialchars($player)."')) ".
-	"\nand cgrant_sentiment(twtext) = '$sent'".
-	//"\nGROUP BY sent, text". 
-	"\nlimit ".$_GET["num"].";";
-
-		list($tic_usec, $tic_sec) = explode(" ", microtime());
-		$result = pg_query($query) or die('Query failed: ' . pg_last_error());
-		list($toc_usec, $toc_sec) = explode(" ", microtime());
-		$querytime = $toc_sec + $toc_usec - ($tic_sec + $tic_usec);
-?>	
 
 			<div class="content">
         <div class="page-header">
@@ -128,39 +152,7 @@ $query = "select cgrant_sentiment(twtext) as sent, twtext, twuser_id_str, id_str
         <div class="row">
           <div class="span10">
             <h2>Answer</h2>
-						<?php
-							// Printing results in HTML
-							echo "<table>\n";
-							while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
-									echo "\t<tr>\n";
-									//foreach ($line as $col_value) {
-									//		echo "\t\t<td>$col_value</td>\n";
-									//}
-									echo "\t\t<td>";
-									if ($line['sent'] == '+') {
-											echo "<div class='alert-message block-message success'".
-											">".
-											$line['sent'];
-									}
-									else if ($line['sent'] == '-') {
-											echo "<div class='alert-message block-message error'".
-											">".
-											$line['sent'];
-									}
-									else {
-											echo "<div class='alert-message block-message warning'".
-											">".
-											$line['sent'];
-									}
-									//echo "\t\t<td>";
-									$twaddr = "https://twitter.com/#!/".
-										trim($line['twuser_id_str']).
-										"/status/".trim($line['id_str']);
-									echo "<a href='$twaddr'>$twaddr</a></div></td>";
-									echo "\t</tr>\n";
-							}
-							echo "</table>\n";
-						?>
+						<div id="chart_div"></div>
           </div>
           <div class="span4">
             <h3>The Query</h3>
