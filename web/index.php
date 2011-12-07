@@ -27,9 +27,9 @@
 			}
 			$(function() {
 					var dates = $( "#from1, #to1" ).datepicker({
-						defaultDate: "+1w",
+						defaultDate: "-3m",
 						changeMonth: true,
-						numberOfMonths: 3,
+						numberOfMonths: 2,
 						onSelect: function( selectedDate ) {
 							var option = this.id == "from1" ? "minDate" : "maxDate",
 								instance = $( this ).data( "datepicker" ),
@@ -83,7 +83,7 @@
 							<option>o</option>
 							<option>-</option>
 						</select>
-						comments about
+						sentiment comments about
 						<input name="player" class="medium" type="text" value="Revis" /> 
 						<input name="q" type="submit" class="primary btn" value="Query 1"/>
 					<div class="input">
@@ -97,20 +97,45 @@
 						Compare players 
 						<input type="text" name="player1" class="small"/>
 						and 
-						<input type="text" name="player1" class="small"/> 
-						by the number of 
+						<input type="text" name="player2" class="small"/> 
+						by the twitter sentiment over dates from  
+						<input type="text" id="from1" name="from1" class="mini"/>
+						to
+						<input type="text" id="to1" name="to1" class="mini"/>
+						and return
+						<input name="num" type="range" min="1" max="100" value="5" step="1"
+						onchange="slider('2range',this.value)"/>
+						<span id="2range">20</span> 
+						results.
+						<input name="q" type="submit" class="primary btn" value="Query 2"/>
+						<br/>
+					</form>
+
+					<hr/>
+
+					<!-- query 2 -->
+					<form action="query3.php" method="GET">
+						Give me the
 						<select name="sent" type="normalSelect" class="mini">
 							<option>+</option>
 							<option>o</option>
 							<option>-</option>
+						</select>	
+						sentiment for the  
+					top 
+						<input name="num" type="range" min="1" max="20" value="5" step="1"
+						onchange="slider('3range',this.value)"/>
+						<span id="3range">5</span>
+						<select name="sent" type="normalSelect" class="mini">
+							<option value="rb">running backs</option>
+							<option value="qb">quarter backs</option>
+							<option value="wr">wide reciever</option>
 						</select>
-						stories from 
-						<input type="text" id="from1" name="from1" class="mini"/>
-						to
-						<input type="text" id="to1" name="to1" class="mini"/>
-						<input name="q" type="submit" class="primary btn" value="Query 2"/>
+						for tweets.<br/> 
+						<input name="q" type="submit" class="primary btn" value="Query 3"/>
 					</form>
 
+					<hr/>
 				</div> <!-- .span10 -->
 				<div class="span3">
 					&nbsp;	

@@ -75,29 +75,34 @@
 
 		</style>
 		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-		<script type="text/javascript"
-			google.load('visualization', '1.0', {'packages':['corechart']});
-			google.setOnLoadCallback(drawChart);
-			function drawChart() {
+		<script type="text/javascript">
+			google.load('visualization', '1.0', {'packages':['annotatedtimeline']});
+			google.setOnLoadCallback(drawVisualization);
+			function drawVisualization() {
 <?php
+//error_reporting(E_ALL);
+//ini_set('display_errors', '1');
 // Build query
 
 $player1 = $_GET['player1'];
 $player2 = $_GET['player2'];
-$from1 = date("$_GET['from1']");
-$to1 = date("$_GET['to1']");
+$from1 = date($_GET['from1']);
+$to1 = date($_GET['to1']);
+$num = date($_GET['num']);
 
-$query = 
-	"(select $player1, created_at, cgrant_sentiment('twtext')".
-	"\nfrom tweets".
-	"\nwhere (created_at >= $from1 and created <= $to1)".
-	"\nand (cgrant_distance(1,'$player1',2, twtext, 5) > .5)"
+$query = "(select '$player1', created_at, cgrant_sentiment(twtext), twtext ".
+	"\nfrom tweets ".
+	"\nwhere (created_at >= '$from1' and created_at <= '$to1') ".
+	"\nand (cgrant_distance(1,'$player1',2, twtext, 5) > .5) limit $num) ".
 	"\nunion all".
-	"\n(select $player2, cgrant_sentiment('twtext'), created_at".
+	"\n(select '$player2', created_at, cgrant_sentiment(twtext), twtext ".
 	"\nfrom tweets".
-	"\nwhere (created_at >= $from1 and created <= $to1)".
-	"\nand (cgrant_distance(1,'$player2',2, twtext, 5) > .5)"
-	"\nlimit 100";
+	"\nwhere (created_at >= '$from1' and created_at <= '$to1') ".
+	"\nand (cgrant_distance(1,'$player2',2, twtext, 5) > .5) limit $num) ".
+	//"\nlimit $num ".
+	";";
+
+error_log($query."\n\n------------", 3, 'query.log');
 
 // Connecting, selecting database
 $dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=madden options='--client_encoding=UTF8'")
@@ -108,21 +113,68 @@ $dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=mad
 		list($toc_usec, $toc_sec) = explode(" ", microtime());
 		$querytime = $toc_sec + $toc_usec - ($tic_sec + $tic_usec);
 ?>
-				var data = new google.visualizationi.DataTable();
-				data.addColumn('string', 'Player');
-				data.addColumn('date','Date');
+				var data = new google.visualization.DataTable();
+				data.addColumn('datetime','Date'); // 0
+				data.addColumn('number', '<?php echo $player1;?>'); // 1
+				data.addColumn('string','title1'); // 2
+				data.addColumn('string','text1'); // 3
+				data.addColumn('number', '<?php echo $player2;?>'); // 4
+				data.addColumn('string','title2'); // 5
+				data.addColumn('string','text2'); // 6
 
 <?php
-				echo "data.addRows(".count($result).");";
-				$sent = ($line[2]=='+')?1: ($line[2]=='-')?-1:0;
-				while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
-					echo "data.setValue(\'$line[0]\',new Date($line[1]),$sent);\n";	
+				$result_count = pg_num_rows($result);
+/*				echo "data.addRows([\n";
+				$sent = 0;
+				$counter = 0;
+				while ($line = pg_fetch_array($result, null, PGSQL_NUM)) {
+					if ($line[2] == "+") $sent = 1;
+					if ($line[2] == "-") $sent = -1;
+					echo "[new Date('".$line[1]."'), $sent, '".$line[0]."']";
+					
+					$counter++;
+					if($counter< $result_count){
+						echo ",\n";
+					}
 				}
+				echo "]);";
+*/
+
+///*
+		
+		echo "data.addRows(".pg_num_rows($result).");\n";
+				$sent = 0;
+				$counter = 0;
+		while ($line = pg_fetch_array($result, null, PGSQL_NUM)) {
+					if ($line[2] == "+") $sent = 1;
+					if ($line[2] == "-") $sent = -1;
+					if($line[0] == $player1){
+						echo "data.setValue($counter, 0, new Date('".$line[1]."'));\n";	
+						echo "data.setValue($counter, 1, $sent);\n";	
+						echo "data.setValue($counter, 4, 0);\n";	
+						echo "data.setValue($counter, 3, '$player1');\n";	
+						echo "data.setValue($counter, 2, '".$line[4]."');\n";	
+						
+					}
+					else {
+						echo "data.setValue($counter, 0, new Date('".$line[1]."'));\n";	
+						echo "data.setValue($counter, 1, 0);\n";	
+						echo "data.setValue($counter, 4, $sent);\n";	
+						echo "data.setValue($counter, 5, '$player2');\n";	
+						echo "data.setValue($counter, 6, '".$line[4]."');\n";	
+					}
+					$counter++;
+			
+		}
+// */
 ?>
-				var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
-				chart.draw(data, {width: 400, height: 240});
-				
+        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('visualization'));
+
+				//chart.draw(data, {width:600, height: 240, displayAnnotations:true});
+				chart.draw(data, {width:1000, height: 600, displayAnnotations:true, highlightDot:'nearest', displayExactValues:true, annotationsWidth:10, legendPosition:'newRow',dateFormat: "yyyy.MM.dd G 'at' HH:mm:ss vvvv"});
+					
 			}
+		</script>
 </head>
 
 	<!-- <body  onload="prettyPrint()"> -->
@@ -152,7 +204,7 @@ $dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=mad
         <div class="row">
           <div class="span10">
             <h2>Answer</h2>
-						<div id="chart_div"></div>
+						<div id="visualization" style='width: 600px; height: 440px;'></div>
           </div>
           <div class="span4">
             <h3>The Query</h3>
