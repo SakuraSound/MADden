@@ -73,105 +73,9 @@
         border: 0;
       }
 
-		</style>
-		<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-		<script type="text/javascript">
-			google.load('visualization', '1.0', {'packages':['annotatedtimeline']});
-			google.setOnLoadCallback(drawVisualization);
-			function drawVisualization() {
-<?php
-//error_reporting(E_ALL);
-//ini_set('display_errors', '1');
-// Build query
+    </style>
+	</head>
 
-$player1 = $_GET['player1'];
-$player2 = $_GET['player2'];
-$from1 = date($_GET['from1']);
-$to1 = date($_GET['to1']);
-$num = date($_GET['num']);
-
-$oldquery = "(select '$player1', created_at, cgrant_sentiment(twtext), twtext ".
-	"\nfrom tweets ".
-	"\nwhere (created_at >= '$from1' and created_at <= '$to1') ".
-	"\nand (cgrant_distance(1,'$player1',2, twtext, 5) > .5) limit $num) ".
-	"\nunion all".
-	"\n(select '$player2', created_at, cgrant_sentiment(twtext), twtext ".
-	"\nfrom tweets".
-	"\nwhere (created_at >= '$from1' and created_at <= '$to1') ".
-	"\nand (cgrant_distance(1,'$player2',2, twtext, 5) > .5) limit $num) ".
-	//"\nlimit $num ".
-	";";
-
-// OPTOMIZED!!
-$query = "select (CASE WHEN ".
-	"(cgrant_distance(1,'$player1',2, twtext, 5) > .5) THEN '$player1' ".
-	"ELSE '$player2' END), created_at, cgrant_sentiment(twtext), twtext ".
-	"FROM tweets ".
-	"WHERE created_at between '$from1' and '$to1' ".
-	"AND ((cgrant_distance(1,'$player1',2, twtext, 5) > .5) OR ".
-	"(cgrant_distance(1,'$player2',2, twtext, 5) > .5)) LIMIT $num ".
-	";";
-
-
-error_log($query."\n\n------------", 3, 'query.log');
-
-// Connecting, selecting database
-$dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=madden options='--client_encoding=UTF8'")
-    or die('Could not connect: ' . pg_last_error());
-
-		list($tic_usec, $tic_sec) = explode(" ", microtime());
-		$result = pg_query($query) or die('Query failed: ' . pg_last_error());
-		list($toc_usec, $toc_sec) = explode(" ", microtime());
-		$querytime = $toc_sec + $toc_usec - ($tic_sec + $tic_usec);
-?>
-				var data = new google.visualization.DataTable();
-				data.addColumn('datetime','Date'); // 0
-				data.addColumn('number', '<?php echo $player1;?>'); // 1
-				data.addColumn('string','title1'); // 2
-				data.addColumn('string','text1'); // 3
-				data.addColumn('number', '<?php echo $player2;?>'); // 4
-				data.addColumn('string','title2'); // 5
-				data.addColumn('string','text2'); // 6
-
-<?php
-				$result_count = pg_num_rows($result);
-		
-		echo "data.addRows(".pg_num_rows($result).");\n";
-				$sent = 0;
-				$counter = 0;
-		while ($line = pg_fetch_array($result, null, PGSQL_NUM)) {
-					if ($line[2] == "+") $sent = 1;
-					if ($line[2] == "-") $sent = -1;
-					$white = array("\t","\n","\r","\0","\x0B"); 
-					$tweet = str_replace( $white, " ", addslashes($line[3]));
-					if($line[0] == $player1){
-						echo "data.setValue($counter, 0, new Date('".$line[1]."'));\n";	
-						echo "data.setValue($counter, 1, $sent);\n";	
-						echo "data.setValue($counter, 4, 0);\n";	
-						echo "data.setValue($counter, 3, '$player1');\n";	
-						echo "data.setValue($counter, 2, \"$tweet\");\n";	
-						
-					}
-					else {
-						echo "data.setValue($counter, 0, new Date('".$line[1]."'));\n";	
-						echo "data.setValue($counter, 1, 0);\n";	
-						echo "data.setValue($counter, 4, $sent);\n";	
-						echo "data.setValue($counter, 6, '$player2');\n";	
-						echo "data.setValue($counter, 5, \"$line[3]\");\n";	
-					}
-					$counter++;
-			
-		}
-?>
-        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('visualization'));
-
-				chart.draw(data, {displayAnnotations:true, displayExactValues:true, legendPosition:'newRow',dateFormat: "HH:mm:ss 'on' yyyy.MM.dd G", thickness:3, fill:20, displayZoonButtons:false, highlightDot:'nearest'});
-					
-			}
-		</script>
-</head>
-
-	<!-- <body  onload="prettyPrint()"> -->
 	<body>
 
 		<div class="topbar">
@@ -188,6 +92,46 @@ $dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=mad
 		</div> <!-- .topbar -->
 
 		<div class="container">
+<?php
+//error_reporting(E_ALL);
+//ini_set('display_errors', '1');
+
+// Connecting, selecting database
+$dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=madden options='--client_encoding=UTF8'")
+    or die('Could not connect: ' . pg_last_error());
+
+$num = $_GET['num'];
+$player = implode("&", explode(" ", $_GET["player"]));
+$sent = htmlspecialchars($_GET['sent']);
+	// Build query
+$playertable = "passingstats";
+	if($_GET['rb']) {
+		$playertable = "rushingstats";
+	}
+	else if($_GET['rb']) {
+		$playertable = "recievingstats";
+	}
+
+$query = "select id, fname, lname, yards, tds, doc, sentiment from 
+(select id, fname, lname, yards, tds, doc, cgrant_sentiment(doc) as sentiment
+from 
+(select rb.pid as id, rb.first as fname, rb.last as lname, n.twtext as doc, rb.total_yards as yards, rb.touchdowns as tds 
+from tweets n, 
+(select pid, first, last, total_yards, touchdowns, first || ' ' || last as tsv
+from $playertable 
+order by total_yards DESC, touchdowns DESC
+LIMIT $num) as rb 
+where cgrant_distance(1, rb.tsv, 2, n.twtext, 5) > .5) as docs) as sent 
+where sentiment = '$sent'
+limit $num;";
+
+error_log($query."\n\n------------", 3, 'query.log');
+
+		list($tic_usec, $tic_sec) = explode(" ", microtime());
+		$result = pg_query($query) or die('Query failed: ' . pg_last_error());
+		list($toc_usec, $toc_sec) = explode(" ", microtime());
+		$querytime = $toc_sec + $toc_usec - ($tic_sec + $tic_usec);
+?>	
 
 			<div class="content">
         <div class="page-header">
@@ -198,8 +142,21 @@ $dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=mad
         <div class="row">
           <div class="span10">
             <h2>Answer</h2>
-						<div id="visualization" style="height:365px; width:550px;"></div>
-
+						<?php
+							// Printing results in HTML
+							echo "<table>\n";
+							while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
+									echo "\t<tr>\n";
+									echo "<td>".$line['fname']."</td>";
+									echo "<td>".$line['lname']."</td>";
+									echo "<td>".$line['yards']." yards</td>";
+									echo "<td>".$line['tds']." touchdowns</td>";
+									echo "<td>".$line['doc']."</td>";
+									echo "<td>".$line['sentiment']."</td>";
+									echo "\t</tr>\n";
+							}
+							echo "</table>\n";
+						?>
           </div>
           <div class="span4">
             <h3>The Query</h3>
@@ -210,7 +167,7 @@ $dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=mad
 							echo "</code>";
 							//echo "</pre>";
 							echo "<div class=\"alert-message info\">";
-							echo "<p>".($querytime)." sec </p>";
+							echo "<p>".($querytime*100)." msec </p>";
 							echo "</div> <!-- alert -->";
 						?>
           </div>
