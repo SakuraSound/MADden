@@ -1,18 +1,24 @@
 \documentclass{article}
-
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
 \begin{document}
 \begin{enumerate}
 \item Names of the group members and UFIDs
 
-%not sure if it's best to put this into the public with our uf-id on it
+  % not sure if it's best to put this into the public with our uf-id on it ~mhb
 
-Morgan Bauer
+  Morgan Bauer
 
-Christan Grant
+  Christan Grant
 
-Joir-dan Gumbs
+  Joir-dan Gumbs
 
 \item Title of the project and abstract
+
+  MADden
+
 \item Final report should include the following topics:
   \begin{enumerate}
 
@@ -20,18 +26,29 @@ Joir-dan Gumbs
     \begin{enumerate}
     \item The problem statement and a summary of the main contributions and results of the project.
     \item What is the responsibility of each member of the group?
+
+      Morgan did consulting work among the various group members, and between groups.
+      Official NFL team blogs. NFL stats from cbssports.com.
     \end{enumerate}
 
   \item Background (1 page)
-    \begin{enumerate}\item
-      Background information (basic concepts, algorithms, etc.)
+    \begin{enumerate}
+    \item Background information (basic concepts, algorithms, etc.)
+
+      algorithms -- crf (viterbi, forward-backward) evaluation over trained model done in database.
+
     \item Related work
     \item How is this project different from related work
+
+      integration of analysis queries
     \end{enumerate}
 
   \item System Description (4 pages)
     \begin{enumerate}
     \item What is the final system architecture?
+
+      picture here from previous slides.
+
     \item What are the system components and statistical methods developed?
     \item What are the final data products?
     \end{enumerate}
@@ -39,15 +56,24 @@ Joir-dan Gumbs
   \item Experiments (2 pages)
     \begin{enumerate}
     \item What datasets have been used? What’s the measure of success?
+
+      % my description of document size is vague ~mhb
+
+      Twitter -- unstructured, microblogs, very small document size (140 characters).
+
+      Blogs -- english language, small-medium document size, 10-100 sentences.
+
+      play-by-plays -- semi-structured, repeated patterns with specific meaning.
+
     \item What are the main experimental results? Effectiveness/performance?
     \end{enumerate}
 
   \item Conclusion (1 page)
-    \begin{enumerate}\item What you have learnt through this project? What are the difficulties you have encountered in terms of systems and algorithms in building the system to deliver the data products? What kinds of Data Science tools/systems are needed?
+    \begin{enumerate}\item What you have learnt through this project?
+      What are the difficulties you have encountered in terms of systems and algorithms in building the system to deliver the data products?
+      What kinds of Data Science tools/systems are needed?
     \end{enumerate}
-
   \end{enumerate}
-
 \end{enumerate}
 \end{document}
 
