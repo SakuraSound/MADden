@@ -113,7 +113,7 @@
 
 					<hr/>
 
-					<!-- query 2 -->
+					<!-- query 3 -->
 					<form action="query3.php" method="GET">
 						Give me the
 						<select name="sent" type="normalSelect" class="mini">
@@ -133,6 +133,16 @@
 						</select>
 						for tweets.<br/> 
 						<input name="q" type="submit" class="primary btn" value="Query 3"/>
+					</form>
+
+					<hr/>
+					<!-- query 4 -->
+					<form action="query4.php" method="GET">
+						Return all the named entity tags from the text<br/> 
+						<textarea class="xxlarge" id="textarea4" name="comments" rows=3>
+Kirn began his career in psychology, graduating from UF with a master’s degree in clinical psychology in 1971 and a doctorate in the same subject in 1974. While at UF, he met his wife, Katrine, who also earned her doctorate in clinical psychology at UF. He worked in the mental health field for six years, first as an intern and later at community mental health centers and in a private practice in Kentucky that he owned with his wife. He also was a full-time faculty member at Bellarmine University in Louisville for six years
+						</textarea>
+						<input name="q" type="submit" class="primary btn" value="Query 4"/>
 					</form>
 
 					<hr/>

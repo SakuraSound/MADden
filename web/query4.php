@@ -100,16 +100,16 @@
 $dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=madden options='--client_encoding=UTF8'")
     or die('Could not connect: ' . pg_last_error());
 
-$player = implode("&", explode(" ", $_GET["player"]));
-$sent = htmlspecialchars($_GET['sent']);
-		// Build query
-$query = "select cgrant_sentiment(twtext) as sent, twtext, twuser_id_str, id_str".
-	"\nfrom tweets ".
-	"\nwhere (cgrant_distance(1,'".$_GET['player']."',2, twtext, 5) > .5) ".
-	//"\ntwtextvector @@ to_tsquery('".htmlspecialchars($player)."')) ".
-	"\nand cgrant_sentiment(twtext) = '$sent'".
-	//"\nGROUP BY sent, text". 
-	"\nlimit ".$_GET["num"].";";
+$comments = $_GET['comments'];
+$white = array("\t","\n","\r","\0","\x0B"); 
+$comments = str_replace( $white, " ", addslashes($comments));
+
+$query = "select termnum, term ".
+	"from cgrant_ne_chunk('$comments', true) ";
+	"where term = 'NE' ".
+	";";
+
+error_log($query."\n\n------------", 3, 'query.log');
 
 		list($tic_usec, $tic_sec) = explode(" ", microtime());
 		$result = pg_query($query) or die('Query failed: ' . pg_last_error());
@@ -128,33 +128,11 @@ $query = "select cgrant_sentiment(twtext) as sent, twtext, twuser_id_str, id_str
             <h2>Answer</h2>
 						<?php
 							// Printing results in HTML
-							echo "<table>\n";
+							echo "<table class='zebra-stripes'>\n";
 							while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
 									echo "\t<tr>\n";
-									//foreach ($line as $col_value) {
-									//		echo "\t\t<td>$col_value</td>\n";
-									//}
-									echo "\t\t<td>";
-									if ($line['sent'] == '+') {
-											echo "<div class='alert-message block-message success'".
-											">".
-											$line['sent'];
-									}
-									else if ($line['sent'] == '-') {
-											echo "<div class='alert-message block-message error'".
-											">".
-											$line['sent'];
-									}
-									else {
-											echo "<div class='alert-message block-message warning'".
-											">".
-											$line['sent'];
-									}
-									//echo "\t\t<td>";
-									$twaddr = "https://twitter.com/#!/".
-										trim($line['twuser_id_str']).
-										"/status/".trim($line['id_str']);
-									echo "<a href='$twaddr'>$twaddr</a></div></td>";
+									echo "<td>".$line['termnum']."</td>";
+									echo "<td>".$line['term']."</td>";
 									echo "\t</tr>\n";
 							}
 							echo "</table>\n";
