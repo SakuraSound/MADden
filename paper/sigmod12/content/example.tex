@@ -1,18 +1,28 @@
 
-\section{Example Query}
+\section{Text Analysis Queries}
 
-In this example query we demonstrate the flexibility and multi-modal 
-support of \system. Our running query is the question
-``{\tt
-Give me the \underline{best} new 
-involving the National \underline{Arizona} \underline{Cardinals} 
-National Football League team and involving the 
-player \underline{Larry Fitzgerald}.}''
-Notice this query has three parameters, each demarcated by underlines.
-The qualifier `best' here is interpreted as news articles that have the 
-highest ratio of good news to bad news.
-`Arizona' Cardinals' is a professional American Football team in the National
-Football League (NFL) and `Larry Fitzgerald' is a player for that team.
+In this section, we exemplify the type of text analysis queries
+supported by the MADden system using a running example from the
+application domain of computational journalism.
+
+Suppose a sports journalist needs to do some research on public opinion of the
+Arizona Cardinals for the current season, based on recent news, blogs and
+tweets.
+
+\eat{ NFL domain is centered around 32 \textit{teams} and more than 1700
+\textit{players}. Each team in the league plays 4 preseason
+\textit{games} and 16 regular season games. The top teams each play a
+\textit{tournament} which concludes in a final game known as a ``Super
+Bowl''. Additionally, each team has one \textit{head coach} and
+several \textit{assistant coaches}. }
+
+
+\eat{ In addition to the various entities in the domain (e.g.,
+teams, players), the players and teams also have aliases. For
+example, player ``X'' is also called ``Y'', and team ``A'' is also
+called ``B''. In text analysis, we not only need to extracted the
+different entities in this domain, we also need to resolute the
+different names of the same entity.}
 
 \begin{table}
 \begin{center}
@@ -20,32 +30,169 @@ Football League (NFL) and `Larry Fitzgerald' is a player for that team.
 \hline
 \multicolumn{1}{|c|}{Schema}\\
 \hline
-Player (id, name, ...)\\
+NFLCorpus (id, type, entry, title, posted\_at)\\
+\hline
+Players (id, name)\\
+\hline
+PlayerStats (pid, position, stats\ldots)\\
 \hline
 PlayerAlias (pid, nickname)\\
 \hline
-Team (id, name, city)\\
+Teams (id, name, city)\\
 \hline
-TeamAlias (teamid, nickname)\\
+TeamAlias (id, nickname)\\
 \hline
-BlogEntry (id, entry, title, posted\_at)\\
+GameStats (id, game\_date, hid, aid, hscore, ascore)\\
 \hline
 \end{tabular}
 \end{center}
-\caption{This is the schema for Example query}
+\caption{The abbreviated example schema}
 \label{tab:schema}
 \end{table}
 
-As data we are given tables\footnote{These
-tables may be extracted to an RBDMS before hand or defined over an api using
-a foreign data wrapper (fdw). }
-as described in Table \ref{tab:schema}.
-The {\tt Player} table is a list of individuals who play in the NFL with
-associated ids. The {\tt PlayerAlias} table list alternative names for players.
-The {\tt Team} table holds all the team names in the NFL and the {\tt TeamAlias}
-table has all their nick names and abbreviations. The {\tt BlogEntry} table
-is a list of arbitrarily authored documents crawled from the web and downloaded
-from news companies.
+The data is represented by the abbreviated schema\footnote{These tables may be
+extracted to an RDBMS beforehand, or defined over an API
+using a foreign data wrapper (fdw).} shown in Table \ref{tab:schema}.
+The {\tt NFLCorpus} table holds documents crawled from the web,
+and tweets extracted from the Twitter Streaming API. This table contains
+millions of documents, varying in size and quality. The type of document 
+can be specified via the type attribute. The types include `news', `blogs' or
+`tweets'. The \textit{entry} attribute of {\tt NFLCorpus} contains the text data.
+The other tables are structured but the data may contain duplicates or
+misspelled terms. It is also possible for these documents to be out of domain.
+The {\tt Players} table is a list of individuals
+who play in the NFL. The player data is obtained from NFL.com
+The {\tt PlayerStats} table has a \textit{position} field that specifies
+the type of statistic that is inside of the \textit{stats} column.
+The {\tt PlayerAlias} table list alternative names for players.
+While this list may be obtained using topic modeling or word
+co-occurrence, we hand coded a list of alias names for a select
+group of well-known players. This helps in resolving players who are
+referred to by their nickname, `Sticky Fingers', in the case of
+`Larry Fitzgerald'.
+The {\tt Teams} table holds all the team
+names in the NFL and the {\tt TeamAlias} table has the alternate names for these
+teams. ``ARI'' as an abbreviation,  and ``Football Cardinals'' as a nickname, are 
+example entries in this table. {\tt GameStats} contains the amount of points scored by a 
+home and away team for each NFL game played.\\
+
+
+In addition to the table, we have several UDFs that perform several statistical
+text analysis tasks. The {\tt match} function takes two strings and
+uses alias tables to perform a fuzzy match.
+Additionally, {\tt extract\_entities} is a materilized view that is the
+result of the information extraction process in the vein of previous work
+\cite{wang2010probabilistic}.
+It returns tuples with the schema
+(\textit{docid}, \textit{pos}, \textit{token}, \textit{entity}) where the
+columns respectively represent
+the document id (e.g. article url), the position in a document, the token
+in said document and the entity id to which it corresponds.
+The {\tt sentiment} UDF is a sentiment analysis classifier.
+It takes a string or entity as the first parameter and as the second parameter
+it takes the textual entry. It returns \textit{positive} if the sentiment is
+positive and \textit{negative} otherwise.
+
+%In this example query we demonstrate the flexibility and multi-modal
+%support of \system.
+Our running query is an example of a question that may be posed by
+the journalist ``{\tt Give me the positive news involving the Arizona Cardinals
+NFL team and involving the player Larry Fitzgerald.}''
+
+\eat{
+\dzw{query templates should be an interface issue, to be explained
+in the demo section. we can say we support both query interface as
+well as web interface with query templates for executive users} Each
+parameter to the queries is demarcated by underlines. The qualifier
+{\tt best} for news is interpreted as news articles that have the
+highest ratio of good news to bad news.}
+
+In this domain, an example of positive news is a team victory, a player
+making an important play such as a last second score, or contributions to the
+communities they represent (i.e. volunteering, charities).
+{\tt Arizona Cardinals} is a team in the NFL, any team could be selected
+in this parameter.
+The parameter {\tt player} is associated with
+{\tt Larry Fitzgerald} who plays for the Cardinals. The player can be any
+arbitrary player. In place of a player, the user can select a {\tt coach}
+or an arbitrary {\tt person}. The names of players or coaches may also be
+misspelled or simply not unique, so an entity resolution step over
+the documents will be necessary.
+
+
+
+%\lstset{breaklines=true}
+%\lstset{tabsize=2}
+%\lstset{basicstyle=\small}
+%\begin{lstlisting}{language=SQL}
+\begin{small}
+\begin{alltt}
+\textit{Q1: [Ranked Document Lists]}
+SELECT e.freq, c.docid,  e.entry
+FROM NFLCorpus c
+    (SELECT docid, count(*) AS freq
+    FROM extract_entities
+    WHERE match('LarryFitzgerald',entity)) AS e
+WHERE sentiment(entry) = '+',
+    AND match('Arizona Cardinals', entity) is true
+    AND type = 'news' AND c.docid = e.docid
+ORDER BY e.freq
+\end{alltt}
+\end{small}
+%\end{lstlisting}
+
+Other queries that can be answered by \system include aggregates and joins
+between structured and text based data.
+
+This query counts the number of times each entity is mentioned in either tweets
+or blogs. This query performs an aggregate over a fuzzy entity resolution
+task across multiple media. The result of this query could be the input to a
+word cloud or a histogramm for fast visual analysis.
+%\lstset{tabsize=2}
+%\lstset{breaklines=true}
+%\lstset{basicstyle=\small}
+%\begin{lstlisting}{language=SQL}
+\begin{small}
+\begin{alltt}
+\textit{Q2: [Aggregation Query]}
+SELECT entity, SUM(count(t.docid) + count(b.docid))
+FROM NFLCorpus c, extract_entities t, extract_entities b
+WHERE c.type = 'tweets' OR c.type = 'blogs' 
+  AND t.entity = b.entity AND match(ct.entity, t.entity)
+GROUP BY entity
+HAVING freq > 10
+ORDER BY posted_at DESC;
+\end{alltt}
+\end{small}
+%\end{lstlisting}
+
+In this query we do a join over structured data and text to return the
+sentiment towards a team vs. their performance at home. 
+%\lstset{tabsize=2}
+%\lstset{breaklines=true}
+%\lstset{basicstyle=\small}
+%\begin{lstlisting}
+\begin{small}
+\begin{alltt}
+\textit{Q3: [Structured and Unstructre Data]}
+SELECT ts.pid, ts.date, g.hscore / g.ascore AS perf,
+  SUM(sentiment(c.entry))
+FROM Team t, TeamStats ts, NFLCorpus c, GameStats g
+WHERE c.type = 'tweet' AND t.name = 'Cardinals' 
+  AND t.id = g.hid AND gs.game_date = c.posted_at 
+  AND match(t.name,c.entry) IS true
+GROUP BY ts.pid, ts.date, g.hscore, g.ascore
+ORDER BY gs.game_date
+\end{alltt}
+\end{small}
+%\end{lstlisting}
+
+
+This query is typical of a sports agent or a public relations representative
+monitoring the overall public opinion of a team. A query interface provides a
+simple method for real-time monitoring. 
+Multi-modal queries, like this, allows us to find relationships and calculate
+these statistics within one system. 
 
 
 

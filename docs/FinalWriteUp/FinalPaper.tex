@@ -3,7 +3,18 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,amsfonts}
+
+\usepackage{xspace}
+\usepackage{graphicx}
+
+\newcommand{\system}{MADden\xspace}
+
+\title{MADden : In-Database Text Analytics}
+\author{Morgan Bauer 9890-4838 \\
+  Christan Grant 8143-3970 \\
+  Joir-dan Gumbs 6148-9357}
 \begin{document}
+\maketitle
 \begin{enumerate}
 \item Names of the group members and UFIDs
 
@@ -17,7 +28,7 @@
 
 \item Title of the project and abstract
 
-  MADden
+  MADden : In-Database Text Analytics
 
 \item Final report should include the following topics:
   \begin{enumerate}
@@ -47,10 +58,40 @@
     \begin{enumerate}
     \item What is the final system architecture?
 
+      PostgreSQL
+
       picture here from previous slides.
 
+
+
+      \begin{figure}
+        \begin{center}
+          \includegraphics[width=104mm]{architecture-1.png}
+          \caption{System Architecture}
+          \label{fig:architecture}
+        \end{center}
+      \end{figure}
+
+      \begin{figure}
+        \begin{center}
+          \includegraphics[scale=0.4]{arch.png}
+          \caption{{\system} architecture}
+          \label{fig:arch}
+        \end{center}
+      \end{figure}
+
+      \begin{figure}
+        \begin{center}
+          \includegraphics[scale=0.3]{web-ui.png}
+          \caption{{\system} Web UI}
+          \label{fig:web-ui}
+        \end{center}
+      \end{figure}
+
     \item What are the system components and statistical methods developed?
+      
     \item What are the final data products?
+      Query results
     \end{enumerate}
 
   \item Experiments (2 pages)

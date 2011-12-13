@@ -1,24 +1,124 @@
 
 \section{Introduction}
 
-In this paper we describe a \system, a system that allows advanced querying
-over structured and unstructured data. Beyond standard spj queries we
-demonstrate the Inference techniques using native database techniques.
-Additionally, we implementation is over PostgreSQL and Greenplum
-parallel databases, demonstrating the scalability of our system.
+% increasing amounts of unstructured text data
+The field of database management has traditionally focused on
+structured data, providing little or no help for the significantly
+larger amounts of the world's data that is unstructured. For many
+applications, unstructured text and structured data are both
+important natural resources to fuel data analysis. For example, a
+sports journalist covering NFL (National Football
+League\footnote{http://www.nfl.com} - 32 American football teams with
+more than 1700 players) games would need a system that can analyze both the
+structured statistics (e.g., scores, biographic data) of teams and players and the
+unstructured tweets, blogs, and news about the games.
 
-Domains: Sports, Voting
+In such applications, text analysis are performed over text data
+from many sources. Text analysis uses the state-of-the-art
+statistical machine learning (SML) methods to extract structured
+information, such as entities, relations, sentiments, topics, from
+text. The result of the text analysis can be joined with other
+structured data sources to perform analysis. For example, the sports
+journalist may want to join the sentiment result from tweets and the
+scores of the Arizona Cardinals\footnote{http://www.azcardinals.com} 
+(NFL Team) to see their correlations.
 
-Query driven is needed for adhoc analysis.
-To support this over large data we need parallel algos.
+To our knowledge, there is no integrated system with a query
+interface that enables domain experts (e.g., journalists) to issues
+such ad hoc exploratory queries. To answer such queries, a software
+developer is needed to understand and connect multiple tools,
+including Lucene for text search, Weka or MATLAB for sentiment
+analysis, and a database for joining the structured data with the
+sentiment results. Using such a complex offline batch process to 
+answer a single query
+makes it difficult to ask ad hoc queries over ever-evolving text data. 
+These queries are essential for applications, such as computational journalism,
+e-discovery, and political campaign management, where queries are
+exploratory in nature, and follow-up queries need to be asked based
+on the result of previous queries.
 
+\eat{ and an analytic toolkit such as . To support parallelization
+for scalability, frameworks such as Hadoop/MapReduce are also
+required. \eat{A developer would first create indexes for the
+textdata in Lucene to retrieve documents that contain the team
+``Arizona Cardinal''. Such retrieval also needs to perform entity
+resolution to count for typos and aliases. After the documents are
+retrieved a developer can use an off-the-shelf model and algorithm
+to calculate the sentiment.} Finally, the sentiment results are
+imported into a database to be joined with the score statistics.}
 
-In our running example we show the creation of a View over textual
-data involving different textual analysis tasks.
+% need of query-driven analysis
+% higher-level of abstraction of ML models using simple ER models and SQL queries
+% real-time analysis enable exploratory queries and query refinement based on result
+% many applications: computational journalism, campaign management, e-discovery, etc.
 
-As part of this demonstration we show that:
-1) It is possible to do query time textual analytics in the database
+In this demonstration paper, we describe \system, an integrated
+system that supports both relational query processing and
+statistical analysis over text. \system is implemented on top of MADLib,
+which is collection of libraries developed on 
+top of PostgreSQL/Greenplum. MADLib supports
+in-database statistical methods, and in particular, the work on in-database text extraction
+ from BayesStore~\cite{Wang:2008:BML:1453856.1453896} is being integrated into
+ MADLib. \system adapt the statistical methods in MADLib for various text analysis tasks, including classification using Naive Bayes, information extraction using CRF,
+and add entity resolution functionality using q-grams.
 
-2) Methods are scalable using parallel databases postgresql or Greenplum
+\eat{
+% queries supported by madden
 
+% main techniques to support madden
+
+Relational views are created representing the results of statistical
+text analysis over textual data involving different models.
+
+To support this over large data we need parallel algos. }
+
+\system supports a declarative query interface and real-time query
+processing, which is needed for ad hoc analysis. SQL-like queries
+and ER (Entity-Relationship) models are used as a higher-level of
+abstraction of the SML models and inference methods for text
+analysis. ad hoc query-driven text analysis enable exploratory
+queries and query refinement based on the results. Users of such
+query interfaces do not have to know the underlying statistical
+machine learning models or the various text analysis tasks being
+exercised by the systems. This interface provide a clean abstraction
+from the detailed text analysis algorithms from the
+application-specific data exploration.
+
+\eat{ Using {\system} we are able to perform a declarative query
+over the data set to return the set of correct documents. Using
+native SQL statements, we get a query optimizer that allows us to
+perform each step of the query with out iteratively waiting to load
+all documents. Another benefit of {\system} is we bring the query to
+the data, there is no needed to make large copies spend time
+transferring portions of the data around. For large data sets, the
+data becomes unwieldy for in memory implementations. Using
+{\system}, the system and any algorithms scale with the data. A user
+does not have to rely on samples, as commonly done using analytic
+tools. We provide a framework for data analyst to ingest and analyze
+the information on the fly. The system that hold the data is the
+same system that is queries. To support adhoc textual analysis over
+large data sets a query-driven approach is necessary for real-time
+exploration. During the computation we can use the information given
+in the query to reduce total computation.}
+
+% main approach and techniques of MADden
+\eat{In this paper we describe \system, a system that allows
+advanced querying over structured and unstructured data. Beyond
+standard SPJ (Select-Project-Join) queries we demonstrate inference
+algorithms using native database techniques. Additionally, we
+implementation is over PostgreSQL and Greenplum parallel databases,
+demonstrating the scalability of our system.}
+
+In the demonstration of \system, we will show the 
+following points in two application domains, including the NFL
+and the presidential election.
+\begin{itemize}
+\item Real-time processing of ad hoc queries 
+involving statistical text analysis, such as sentiment anlysis,
+information extraction, and entity resolution;
+\item Joining and aggregation between structured and information extracted
+from textual data;
+\item Query-time rendering of visualizations over query results, using 
+word clouds, histograms, and ranked lists of documents.
+\end{itemize}
 
