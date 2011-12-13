@@ -53,7 +53,16 @@
     and pass this on to later stages for further processing.
 
     We provide the ability to run queries over heterogeneous data such as structured statistical facts and unstructured natural language.
-    
+
+    Scraping dirty data and turning it into clean information, and then presenting the information in an easy to digest form.
+
+
+    Goal of tinkering with sports data for gaining insight of team/player performance and fan sentiment.'
+
+    We do however hope to be generic, and liberal in the data we take in, so that the same techniques can be applied to multiple domains.
+
+    There is a web interface that provides preassembled queries that can be filled in like the madlibs game.
+    It serves as a proving ground for various queries we test and run.
 
   \item What is the responsibility of each member of the group?
 
@@ -64,11 +73,35 @@
   \end{enumerate}
 
   \section{Background (1 page)}
+  \subsection{Domain}
+
+  Our initial domain is the National Football League (NFL).
+  This would be useful for a sports journalist to do digital journalism.
+  Covering all 32 teams is made managable.
+
   \begin{enumerate}
   \item Background information (basic concepts, algorithms, etc.)
 
 
-    algorithms -- Conditional Random Fields (CRF)
+    Statistical Text Analysis Tools - list them and give a short description
+
+    Sentiment
+
+    IE
+
+    ER
+
+    POS Tagging
+
+    Conditional Random Fields (CRF) are a type of graphical model.
+    A CRF is a supervised learning algorithm, requiring labeled training examples.
+    In our case we are using CRFs to label sequences of natural language text.
+    The quality and breadth of this set determines how well the trained CRF performs.
+    They can be used for different things depending on their training set.
+    We intended to use CRFs for POS tagging, IE, and ER.
+
+    We have an implementation of the CRF evaluation, that uses a provided model, and labels sequences in the database.
+
     (viterbi, forward-backward, linear vs skip-chain) evaluation over pre-trained model done in database.
 
 
@@ -79,7 +112,9 @@
 
     MADlib, directly
 
-    Twitter sentiment, for twitter sentiment.
+    NLTK, POS Tagging, among other things.
+
+    Twitter sentiment, for twitter sentiment. maybe reference whatever is being worked on with Wilson involving this.
 
     IIT for CRF training.
 
@@ -87,8 +122,14 @@
 
   \item How is this project different from related work
 
-    integration of analysis queries into the database. ability to build ad hoc queries, as if they fit.
+    Integration of analysis queries into the database.
+    Ability to build ad hoc queries, as if they fit.
   \end{enumerate}
+
+
+
+
+
 
   \section{System Description (4 pages)}
   \begin{enumerate}
@@ -99,11 +140,12 @@
     From the user interface,
     queries are then passed to the DBMS,
     where MADLib and {\system} libraries sit on top of the query processor to add statistical and text processing functionality.
-    %These queries are processed using PostgreSQL/Greenplum's Parallel DB architecture to further optimize on replicated storage.
+    % These queries are processed using PostgreSQL/Greenplum's Parallel DB architecture to further optimize on replicated storage.
 
   \item What are the system components and statistical methods developed?
 
     PostgreSQL, with MADlib overtop.
+    Hope to scale up and use greenplum parallel DB.
 
     There is a new feature for MADlib that implements CRF evaluation, but not training, in the database.
     CRF specifically -
@@ -111,8 +153,8 @@
     The full text search capabilities of PostgreSQL are leveraged,
     as is the technique of inverted indexing.
 
-    
 
+    Statistical Text Analysis Tools - in depth description of how they were performed.
     \begin{enumerate}
     \item information extraction
 
@@ -141,10 +183,17 @@
 
       Example of multiple names for a person. Nickname for Larry Fitzgerald, Sticky Fingers. IBM, Big Blue. New York City, Big Apple.
 
+      Example of multiple things with one name.
+      Arizona Cardinals, cardinals as a bird.
+      Miami Dolphins, dolphins as a fish, dolphins as a mammal
+
       This is implemented through q-grams for misspellings and alternate spellings,
       and an alias table for multiple names of an entity.
-      q-grams is the automatic approach,
-      with the alias table being hand constructed.
+      q-grams is the automatic approach that does fuzzy string matching,
+      with a threshold value that can be varied.
+      The alias table being hand constructed.
+
+      Resolving the multiple things with one name, was not tackled. (as far as I can tell mhb)
 
     \item sentiment analysis
 
@@ -232,6 +281,21 @@
     Ad hoc queries
 
     Query results
+
+    From first proposal:
+    \begin{enumerate}
+    \item[1] Correlations between game actions, such as:
+      \begin{enumerate}
+      \item[A] Outcome of coin toss for home/away team
+      \item[B] Probability of making field goal based on
+        stadium (by distance of attempt)
+      \item[C] Fan sentiment with game outcome.
+      \end{enumerate}
+    \item[2] Summary of team performance
+    \item[3] Tweet density for every game
+    \item[4] ... and other things yet to be discovered
+    \end{enumerate}
+
   \end{enumerate}
 
 
@@ -242,7 +306,7 @@
     Datasets
     % my description of document size is vague ~mhb
 
-    Twitter -- unstructured, microblogs, very small document size (140 characters).
+    Twitter -- unstructured, microblogs, very small document size (140 characters). This was gathered using the twitter trickle. With domain related terms, like NFL, Tim Tebow, Jets.
 
     Blogs -- english language, small-medium document size, 10-100 sentences.
 
@@ -253,6 +317,11 @@
     Do we get sane output? Yes.
 
   \item What are the main experimental results? Effectiveness/performance?
+
+    Throughput for sentiment analysis is dominated by making a remote call.
+
+    Throughput for POS tagging is dominated by making a python call (interpreted).
+
   \end{enumerate}
 
   \section{Conclusion (1 page)}
