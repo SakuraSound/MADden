@@ -52,6 +52,9 @@
     We use statistical text analysis techniques to extract structured information from unstructured data,
     and pass this on to later stages for further processing.
 
+    We provide the ability to run queries over heterogeneous data such as structured statistical facts and unstructured natural language.
+    
+
   \item What is the responsibility of each member of the group?
 
 
@@ -65,7 +68,8 @@
   \item Background information (basic concepts, algorithms, etc.)
 
 
-    algorithms -- crf (viterbi, forward-backward, linear vs skip-chain) evaluation over pre-trained model done in database.
+    algorithms -- Conditional Random Fields (CRF)
+    (viterbi, forward-backward, linear vs skip-chain) evaluation over pre-trained model done in database.
 
 
 
@@ -95,13 +99,19 @@
     From the user interface,
     queries are then passed to the DBMS,
     where MADLib and {\system} libraries sit on top of the query processor to add statistical and text processing functionality.
-    These queries are processed using PostgreSQL/Greenplum's Parallel DB architecture to further optimize on replicated storage.
+    %These queries are processed using PostgreSQL/Greenplum's Parallel DB architecture to further optimize on replicated storage.
 
+  \item What are the system components and statistical methods developed?
 
     PostgreSQL, with MADlib overtop.
 
     There is a new feature for MADlib that implements CRF evaluation, but not training, in the database.
     CRF specifically -
+
+    The full text search capabilities of PostgreSQL are leveraged,
+    as is the technique of inverted indexing.
+
+    
 
     \begin{enumerate}
     \item information extraction
@@ -148,7 +158,7 @@
       when the submission API supports batches of documents.
       Priority should be given to establish batch submissions,
       followed by writing the UDF as a local function,
-      if not an in-database function.
+      and possibly an in-database function.
 
     \item part of speech tagging
 
@@ -213,7 +223,7 @@
       \end{center}
     \end{figure}
 
-  \item What are the system components and statistical methods developed?
+
 
   \item What are the final data products?
 
