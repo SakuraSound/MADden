@@ -66,35 +66,69 @@
       where MADLib and {\system} libraries sit on top of the query processor to add statistical and text processing functionality.
       These queries are processed using PostgreSQL/Greenplum's Parallel DB architecture to further optimize on replicated storage.
 
+
+      PostgreSQL, with MADlib overtop.
+      There is a new feature for MADlib that implements CRF evaluation, but not training, in the database.
+      CRF specifically -
+
       \begin{enumerate}
       \item information extraction
-
         
+        Verbatim from previous paper.
+
+        Once we have the text documents, we would like to then be able to identify
+        objects of interest. Information Extraction methods become increasingly
+        important as the size of our corpus gets large. Many methods exist for in-database data
+        extraction, but we are currently focused on building upon existing work in
+        utilizing Conditional Random Fields (CRFs) for query-time extraction of
+        entities
+
       \item entity resolution
 
-        This links various forms and representations of the same background object, 
+        What it is -
+        This links various forms and representations of the same background object,
         so that a query for one of them returns the results for all of them.
+
+        Why is it necessary -
         This is necessary for two reasons,
-        the informality of speaking in documents like blog posts and twitter tweets, 
+        the informality of speaking in documents like blog posts and twitter tweets,
         which leads to misspellings and slang
         and the more general case of people or companies having many names to refer to them.
-        
+
         Example of informality, slang \& misspelling. tmrw, tomorrow. NY Jest, NY Jets.
 
         Example of multiple names for a person. Nicknames. IBM, Big Blue. New York City, Big Apple.
 
       \item sentiment analysis
 
+        
 
       \item part of speech tagging
+        
+        
+        
+        Using CRF -
+        Initially trained on email headers. 
+        This data was not generic enough to be useful.
+        The individual documents were to small and not of a form similar enough to ensure correct tags.
+        
+        The next CRF was trained using (email contents)? .
+        While it had a higher accuracy, the training corpus was probably too small (only 100 or 200 documents right?). 
+        The tagging accuracy was higher than the previous CRFs
 
-        Using CRF
+        We need to train a CRF specific to our domain,
+        and would like to train a CRF specific to each type of text,
+        such as a twitter CRF, a blog CRF, etc.
 
-        Using NLTK.
+        Using NLTK -
+        Our current system does not utilize the CRF style model.
+
       \end{enumerate}
 
 
-      PostgreSQL, with MADlib overtop.
+      
+
+      
 
       call to twitter sentiment . This is done as a udf calling python script which uses a JSON API.
 
