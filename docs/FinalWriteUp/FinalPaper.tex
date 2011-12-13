@@ -31,7 +31,7 @@
 
   MADden : In-Database Text Analytics
 
-ABSTRACT
+  ABSTRACT
 
 
 
@@ -131,12 +131,24 @@ ABSTRACT
 
       Example of multiple names for a person. Nickname for Larry Fitzgerald, Sticky Fingers. IBM, Big Blue. New York City, Big Apple.
 
-      This is implemented through q-grams for misspellings and alternate spellings, and an alias table for multiple names of an entity.
-      q-grams is the automatic approach, with the alias table being hand constructed.
+      This is implemented through q-grams for misspellings and alternate spellings,
+      and an alias table for multiple names of an entity.
+      q-grams is the automatic approach,
+      with the alias table being hand constructed.
 
     \item sentiment analysis
 
       Sentiment analysis extracts the polarity of subjective opinions from documents.
+      The current implementation returns sentiment as a trinary option of positive, neutral, or negative.
+      We would like to have more gradations in the extremeness of the opinion,
+      as well as analysis of an opinion pertaining to a certain subject, or entity, that has been extracted.
+
+      Currently this is handled as a UDF which makes an out of database call across the network.
+      It also does this on a document by document basis,
+      when the submission API supports batches of documents.
+      Priority should be given to establish batch submissions,
+      followed by writing the UDF as a local function,
+      if not an in-database function.
 
     \item part of speech tagging
 
