@@ -79,26 +79,37 @@
   This would be useful for a sports journalist to do digital journalism.
   Covering all 32 teams is made managable.
 
+  \subsection{Background Information}
   \begin{enumerate}
   \item Background information (basic concepts, algorithms, etc.)
 
 
-    Statistical Text Analysis Tools - list them and give a short description
 
-    Sentiment
+  \item Statistical Text Analysis Tools - list them and give a short description
 
-    Information Extraction (IE) is the concept of identifying objects of interest,
+
+  \item Part of Speech (POS) Tagging is the basis of further querying.
+
+
+  \item Sentiment
+
+
+  \item Information Extraction (IE) is the concept of identifying objects of interest,
     using relations present in the data.
     This varies from simple relations between subjects,
     to recognizing specific entities within text.
 
-    Entity Resolution (ER) is the processing of recognizing and disambiguating different subjects in a document.
+
+  \item Entity Resolution (ER) is the processing of recognizing and disambiguating different subjects in a document.
     That is, recognizing that people are present,
-    or mentioned, and knowing who they are. 
+    or mentioned, and knowing who they are.
 
-    Part of Speech (POS) Tagging
+    Where as IE was concerned about the existence of various objects,
+    and identifying their existence,
+    ER is concerned with taking these entities and knowing whether they are the same or different.
 
-    Conditional Random Fields (CRF) are a type of graphical model.
+
+  \item Conditional Random Fields (CRF) are a type of graphical model.
     A CRF is a supervised learning algorithm, requiring labeled training examples.
     In our case we are using CRFs to label sequences of natural language text.
     The quality and breadth of this set determines how well the trained CRF performs.
@@ -110,9 +121,8 @@
 
     (viterbi, forward-backward, linear vs skip-chain) evaluation over pre-trained model done in database.
 
-
-
-  \item Related work
+  \end{enumerate}
+\subsection{Related work}
 
     related work
 
@@ -126,16 +136,11 @@
 
     Wang et al. for idea of doing CRF in database
 
-  \item How is this project different from related work
+\subsection{Our Uniquness}
+ How is this project different from related work
 
     Integration of analysis queries into the database.
     Ability to build ad hoc queries, as if they fit.
-  \end{enumerate}
-
-
-
-
-
 
   \section{System Description (4 pages)}
   \subsection{System Architecture}
@@ -194,11 +199,15 @@
 
     Example of informality, slang \& misspelling. tmrw, tomorrow. NY Jest, NY Jets.
 
-    Example of multiple names for a person. Nickname for Larry Fitzgerald, Sticky Fingers. IBM, Big Blue. New York City, Big Apple.
+    Example of multiple names for a person.
+    Nickname for Larry Fitzgerald, Sticky Fingers.
+    Company Name and Acronym and Nickname, International Business Machines, IBM, Big Blue.
+    New York City, Big Apple.
 
     Example of multiple things with one name.
     Arizona Cardinals, cardinals as a bird.
     Miami Dolphins, dolphins as a fish, dolphins as a mammal
+
 
     This is implemented through q-grams for misspellings and alternate spellings,
     and an alias table for multiple names of an entity.
