@@ -13,6 +13,7 @@
 \author{Morgan Bauer 9890-4838 \\
   Christan Grant 8143-3970 \\
   Joir-dan Gumbs 6148-9357}
+\date{December 13, 2011}
 \begin{document}
 \maketitle
 \begin{enumerate}
@@ -30,171 +31,212 @@
 
   MADden : In-Database Text Analytics
 
+ABSTRACT
+
+
+
 \item Final report should include the following topics:
+
+  \section{Introduction (1 page)}
+
+  MADlib, MAD, Magnetic Agile Deep.
+  Madlibs, fill in the blank games, that usually have amusing and unforeseen outcomes.
+  MADden, our initial problem domain deals with football,
+  and John Madden is a famous former player, coach, and commentator,
+  also known for the long-running series of video games that bear his name.
+
   \begin{enumerate}
+  \item The problem statement and a summary of the main contributions and results of the project.
 
-  \item  Introduction (1 page)
+    Problem is he large amounts of structured and unstructured data that is available, and how to intermix the two.
+    We use statistical text analysis techniques to extract structured information from unstructured data,
+    and pass this on to later stages for further processing.
+
+  \item What is the responsibility of each member of the group?
+
+
+
+    Morgan did consulting work among the various group members, and between groups.
+    Official NFL team blogs. NFL stats from cbssports.com.
+  \end{enumerate}
+
+  \section{Background (1 page)}
+  \begin{enumerate}
+  \item Background information (basic concepts, algorithms, etc.)
+
+
+    algorithms -- crf (viterbi, forward-backward, linear vs skip-chain) evaluation over pre-trained model done in database.
+
+
+
+  \item Related work
+
+    related work
+
+    MADlib, directly
+
+    Twitter sentiment, for twitter sentiment.
+
+    IIT for CRF training.
+
+    Wang et al. for idea of doing CRF in database
+
+  \item How is this project different from related work
+
+    integration of analysis queries into the database. ability to build ad hoc queries, as if they fit.
+  \end{enumerate}
+
+  \section{System Description (4 pages)}
+  \begin{enumerate}
+  \item What is the final system architecture?
+
+    {\system} is a four layered system, as can be seen in Figure \ref{fig:arch}.
+    The user interface is where both naive and advanced users can construct queries over text, structured data, and models.
+    From the user interface,
+    queries are then passed to the DBMS,
+    where MADLib and {\system} libraries sit on top of the query processor to add statistical and text processing functionality.
+    These queries are processed using PostgreSQL/Greenplum's Parallel DB architecture to further optimize on replicated storage.
+
+
+    PostgreSQL, with MADlib overtop.
+
+    There is a new feature for MADlib that implements CRF evaluation, but not training, in the database.
+    CRF specifically -
+
     \begin{enumerate}
-    \item The problem statement and a summary of the main contributions and results of the project.
-    \item What is the responsibility of each member of the group?
+    \item information extraction
 
-      Morgan did consulting work among the various group members, and between groups.
-      Official NFL team blogs. NFL stats from cbssports.com.
+      Verbatim from previous paper.
+
+      Once we have the text documents, we would like to then be able to identify
+      objects of interest. Information Extraction methods become increasingly
+      important as the size of our corpus gets large. Many methods exist for in-database data
+      extraction, but we are currently focused on building upon existing work in
+      utilizing Conditional Random Fields (CRFs) for query-time extraction of
+      entities.
+
+    \item entity resolution
+
+      What it is -
+      This links various forms and representations of the same background object,
+      so that a query for one of them returns the results for all of them.
+
+      Why is it necessary -
+      This is necessary for two reasons,
+      the informality of speaking in documents like blog posts and twitter tweets,
+      which leads to misspellings and slang
+      and the more  general case of people or companies having many names to refer to them.
+
+      Example of informality, slang \& misspelling. tmrw, tomorrow. NY Jest, NY Jets.
+
+      Example of multiple names for a person. Nickname for Larry Fitzgerald, Sticky Fingers. IBM, Big Blue. New York City, Big Apple.
+
+      This is implemented through q-grams for misspellings and alternate spellings, and an alias table for multiple names of an entity.
+      q-grams is the automatic approach, with the alias table being hand constructed.
+
+    \item sentiment analysis
+
+      Sentiment analysis extracts the polarity of subjective opinions from documents.
+
+    \item part of speech tagging
+
+      Part of Speech Tagging (POS tagging) labels each token of a sequence with a tag based on the grammar of a natural language.
+      These tags are parts of speech, based on context and word definitions.
+      The generators for these tags can come from both supervised and unsupervised sources.
+      Statistical methods are used to generate taggers specific to a corpus, and thus a particular subject.
+      These parts of speech are useful in other stages, such as entity resolution and information extraction (ER \& IR).
+
+      Using CRF -
+      Initially trained on email headers.
+      This data was not generic enough to be useful.
+      The individual documents were to small and not of a form similar enough to ensure correct tags.
+
+      The next CRF was trained using (email contents)? .
+      While it had a higher accuracy, the training corpus was probably too small (only 100 or 200 documents right?).
+      The tagging accuracy was higher than the previous CRFs
+
+      We need to train a CRF specific to our domain,
+      and would like to train a CRF specific to each type of text,
+      such as a twitter CRF, a blog CRF, etc.
+
+      Using NLTK -
+      Our current system does not utilize the CRF style model.
+      Instead, as a UDF, we make a call to the Python Natural Language Toolkit (NLTK).
+      (what kind of tagger is this? Brill? Naive Bayes? I don't know where the sourcecode is. ~mhb)
+      This returns the tagged data, which can be used in PostgreSQL for later stages of analysis.
+
+
     \end{enumerate}
 
-  \item Background (1 page)
-    \begin{enumerate}
-    \item Background information (basic concepts, algorithms, etc.)
-
-      algorithms -- crf (viterbi, forward-backward) evaluation over trained model done in database.
-
-    \item Related work
-    \item How is this project different from related work
-
-      integration of analysis queries
-    \end{enumerate}
-
-  \item
-    \section{System Description (4 pages)}
-    \begin{enumerate}
-    \item What is the final system architecture?
-
-      {\system} is a four layered system, as can be seen in Figure \ref{fig:arch}.
-      The user interface is where both naive and advanced users can construct queries over text, structured data, and models.
-      From the user interface,
-      queries are then passed to the DBMS,
-      where MADLib and {\system} libraries sit on top of the query processor to add statistical and text processing functionality.
-      These queries are processed using PostgreSQL/Greenplum's Parallel DB architecture to further optimize on replicated storage.
 
 
-      PostgreSQL, with MADlib overtop.
-      There is a new feature for MADlib that implements CRF evaluation, but not training, in the database.
-      CRF specifically -
-
-      \begin{enumerate}
-      \item information extraction
-        
-        Verbatim from previous paper.
-
-        Once we have the text documents, we would like to then be able to identify
-        objects of interest. Information Extraction methods become increasingly
-        important as the size of our corpus gets large. Many methods exist for in-database data
-        extraction, but we are currently focused on building upon existing work in
-        utilizing Conditional Random Fields (CRFs) for query-time extraction of
-        entities
-
-      \item entity resolution
-
-        What it is -
-        This links various forms and representations of the same background object,
-        so that a query for one of them returns the results for all of them.
-
-        Why is it necessary -
-        This is necessary for two reasons,
-        the informality of speaking in documents like blog posts and twitter tweets,
-        which leads to misspellings and slang
-        and the more general case of people or companies having many names to refer to them.
-
-        Example of informality, slang \& misspelling. tmrw, tomorrow. NY Jest, NY Jets.
-
-        Example of multiple names for a person. Nicknames. IBM, Big Blue. New York City, Big Apple.
-
-      \item sentiment analysis
-
-        
-
-      \item part of speech tagging
-        
-        Part of Speech Tagging (POS tagging) labels each token of a sequence with a tag based on the grammar of a natural language.
-        These tags are parts of speech, based on context and word definitions.
-        The generators for these tags can come from both supervised and unsupervised sources.
-        Statistical methods are used to generate taggers specific to a corpus, and thus a particular subject.
-        These parts of speech are useful in other stages, such as entity resolution and information extraction (ER \& IR).
-        
-        Using CRF -
-        Initially trained on email headers. 
-        This data was not generic enough to be useful.
-        The individual documents were to small and not of a form similar enough to ensure correct tags.
-        
-        The next CRF was trained using (email contents)? .
-        While it had a higher accuracy, the training corpus was probably too small (only 100 or 200 documents right?). 
-        The tagging accuracy was higher than the previous CRFs
-
-        We need to train a CRF specific to our domain,
-        and would like to train a CRF specific to each type of text,
-        such as a twitter CRF, a blog CRF, etc.
-
-        Using NLTK -
-        Our current system does not utilize the CRF style model.
-        Instead, as a UDF, we make a call to the Python Natural Language Toolkit (NLTK).
-        (what kind of tagger is this? Brill? Naive Bayes? I don't know where the sourcecode is. ~mhb)
-        This returns the tagged data, which can be used in PostgreSQL for later stages of analysis.
-        
-
-      \end{enumerate}
 
 
-      
 
-      
+    call to twitter sentiment . This is done as a udf calling python script which uses a JSON API.
 
-      call to twitter sentiment . This is done as a udf calling python script which uses a JSON API.
+    Call to nltk for entity resolution.
 
-      Call to nltk for entity resolution.
+    \begin{figure}
+      \begin{center}
+        \includegraphics[width=104mm]{architecture-1.png}
+        \caption{System Architecture}
+        \label{fig:architecture}
+      \end{center}
+    \end{figure}
 
-      \begin{figure}
-        \begin{center}
-          \includegraphics[width=104mm]{architecture-1.png}
-          \caption{System Architecture}
-          \label{fig:architecture}
-        \end{center}
-      \end{figure}
+    \begin{figure}
+      \begin{center}
+        \includegraphics[scale=0.4]{arch.png}
+        \caption{{\system} architecture}
+        \label{fig:arch}
+      \end{center}
+    \end{figure}
 
-      \begin{figure}
-        \begin{center}
-          \includegraphics[scale=0.4]{arch.png}
-          \caption{{\system} architecture}
-          \label{fig:arch}
-        \end{center}
-      \end{figure}
+    \begin{figure}
+      \begin{center}
+        \includegraphics[scale=0.3]{web-ui.png}
+        \caption{{\system} Web UI}
+        \label{fig:web-ui}
+      \end{center}
+    \end{figure}
 
-      \begin{figure}
-        \begin{center}
-          \includegraphics[scale=0.3]{web-ui.png}
-          \caption{{\system} Web UI}
-          \label{fig:web-ui}
-        \end{center}
-      \end{figure}
+  \item What are the system components and statistical methods developed?
 
-    \item What are the system components and statistical methods developed?
+  \item What are the final data products?
 
-    \item What are the final data products?
+    We don't have particular products, so much as abilities to deliver varying products.
 
-      We don't have particular products, so much as abilities to deliver varying products.
+    Ad hoc queries
 
-      Query results
-    \end{enumerate}
+    Query results
+  \end{enumerate}
 
-  \item Experiments (2 pages)
-    \begin{enumerate}
-    \item What datasets have been used? What’s the measure of success?
 
-      % my description of document size is vague ~mhb
+  \section{Experiments (2 pages)}
+  \begin{enumerate}
+  \item What datasets have been used? What’s the measure of success?
 
-      Twitter -- unstructured, microblogs, very small document size (140 characters).
+    Datasets
+    % my description of document size is vague ~mhb
 
-      Blogs -- english language, small-medium document size, 10-100 sentences.
+    Twitter -- unstructured, microblogs, very small document size (140 characters).
 
-      play-by-plays -- semi-structured, repeated patterns with specific meaning.
+    Blogs -- english language, small-medium document size, 10-100 sentences.
 
-    \item What are the main experimental results? Effectiveness/performance?
-    \end{enumerate}
+    play-by-plays -- semi-structured, repeated patterns with specific meaning.
 
-  \item Conclusion (1 page)
-    \begin{enumerate}\item What you have learnt through this project?
-      What are the difficulties you have encountered in terms of systems and algorithms in building the system to deliver the data products?
-      What kinds of Data Science tools/systems are needed?
-    \end{enumerate}
+    Measure of success?
+
+    Do we get sane output? Yes.
+
+  \item What are the main experimental results? Effectiveness/performance?
+  \end{enumerate}
+
+  \section{Conclusion (1 page)}
+  \begin{enumerate}\item What you have learnt through this project?
+    What are the difficulties you have encountered in terms of systems and algorithms in building the system to deliver the data products?
+    What kinds of Data Science tools/systems are needed?
   \end{enumerate}
 \end{enumerate}
 
@@ -204,6 +246,7 @@ MADlib http://madlib.net/
 
 https://sites.google.com/site/twittersentimenthelp/
 
+IIT CRF http://crf.sourceforge.net/
 \end{document}
 
 %%% Local Variables:
