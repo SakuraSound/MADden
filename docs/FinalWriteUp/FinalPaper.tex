@@ -105,7 +105,11 @@
 
       \item part of speech tagging
         
-        
+        Part of Speech Tagging (POS tagging) labels each token of a sequence with a tag based on the grammar of a natural language.
+        These tags are parts of speech, based on context and word definitions.
+        The generators for these tags can come from both supervised and unsupervised sources.
+        Statistical methods are used to generate taggers specific to a corpus, and thus a particular subject.
+        These parts of speech are useful in other stages, such as entity resolution and information extraction (ER \& IR).
         
         Using CRF -
         Initially trained on email headers. 
@@ -122,6 +126,10 @@
 
         Using NLTK -
         Our current system does not utilize the CRF style model.
+        Instead, as a UDF, we make a call to the Python Natural Language Toolkit (NLTK).
+        (what kind of tagger is this? Brill? Naive Bayes? I don't know where the sourcecode is. ~mhb)
+        This returns the tagged data, which can be used in PostgreSQL for later stages of analysis.
+        
 
       \end{enumerate}
 
