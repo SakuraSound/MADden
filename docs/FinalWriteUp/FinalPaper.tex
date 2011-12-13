@@ -76,8 +76,14 @@
   \subsection{Domain}
 
   Our initial domain is the National Football League (NFL).
-  This would be useful for a sports journalist to do digital journalism.
-  Covering all 32 teams is made managable.
+  This would be useful for a sports journalist to do computational/digital journalism.
+  Covering all 32 teams with more than 1700 players is made manageable.
+  A sports journalist would need a system
+  that can analyze both the
+  structured statistics (e.g., scores, biographic data) of teams and players and the
+  unstructured tweets, blogs, and news about the games.
+
+
 
   \subsection{Background Information}
   \begin{enumerate}
@@ -86,6 +92,15 @@
 
 
   \item Statistical Text Analysis Tools - list them and give a short description
+
+    Text analysis uses the state-of-the-art statistical machine learning (SML) methods to extract structured information,
+    such as entities, relations, sentiments, topics, from text.
+
+    The result of the text analysis can be joined with other
+    structured data sources to perform analysis. For example, the sports
+    journalist may want to join the sentiment result from tweets and the
+    scores of the Arizona Cardinals\footnote{http://www.azcardinals.com}
+    (NFL Team) to see their correlations.
 
 
   \item Part of Speech (POS) Tagging is the basis of further querying.
@@ -122,25 +137,28 @@
     (viterbi, forward-backward, linear vs skip-chain) evaluation over pre-trained model done in database.
 
   \end{enumerate}
-\subsection{Related work}
+  \subsection{Related work}
 
-    related work
+  related work
 
-    MADlib, directly
+  MADlib, directly
 
-    NLTK, POS Tagging, among other things.
+  NLTK, POS Tagging, among other things.
 
-    Twitter sentiment, for twitter sentiment. maybe reference whatever is being worked on with Wilson involving this.
+  Twitter sentiment, for twitter sentiment. maybe reference whatever is being worked on with Wilson involving this.
 
-    IIT for CRF training.
+  IIT for CRF training.
 
-    Wang et al. for idea of doing CRF in database
+  Wang et al. for idea of doing CRF in database
 
-\subsection{Our Uniquness}
- How is this project different from related work
+  \subsection{Our Uniquness}
+  How is this project different from related work
 
-    Integration of analysis queries into the database.
-    Ability to build ad hoc queries, as if they fit.
+  Integration of analysis queries into the database.
+  Ability to build ad hoc queries, as if they fit.
+
+  Using {\system} we are able to perform a declarative query over the data set to return related documents.
+  This is a ``what we want, not how to get it'' style query.
 
   \section{System Description (4 pages)}
   \subsection{System Architecture}
@@ -376,7 +394,7 @@ References
 
 MADlib http://madlib.net/
 
-https://sites.google.com/site/twittersentimenthelp/
+twitter sentiment https://sites.google.com/site/twittersentimenthelp/
 
 IIT CRF http://crf.sourceforge.net/
 \end{document}
