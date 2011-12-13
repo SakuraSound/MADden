@@ -54,15 +54,51 @@
       integration of analysis queries
     \end{enumerate}
 
-  \item System Description (4 pages)
+  \item
+    \section{System Description (4 pages)}
     \begin{enumerate}
     \item What is the final system architecture?
 
-      PostgreSQL
+      {\system} is a four layered system, as can be seen in Figure \ref{fig:arch}.
+      The user interface is where both naive and advanced users can construct queries over text, structured data, and models.
+      From the user interface,
+      queries are then passed to the DBMS,
+      where MADLib and {\system} libraries sit on top of the query processor to add statistical and text processing functionality.
+      These queries are processed using PostgreSQL/Greenplum's Parallel DB architecture to further optimize on replicated storage.
 
-      picture here from previous slides.
+      \begin{enumerate}
+      \item information extraction
+
+        
+      \item entity resolution
+
+        This links various forms and representations of the same background object, 
+        so that a query for one of them returns the results for all of them.
+        This is necessary for two reasons,
+        the informality of speaking in documents like blog posts and twitter tweets, 
+        which leads to misspellings and slang
+        and the more general case of people or companies having many names to refer to them.
+        
+        Example of informality, slang \& misspelling. tmrw, tomorrow. NY Jest, NY Jets.
+
+        Example of multiple names for a person. Nicknames. IBM, Big Blue. New York City, Big Apple.
+
+      \item sentiment analysis
 
 
+      \item part of speech tagging
+
+        Using CRF
+
+        Using NLTK.
+      \end{enumerate}
+
+
+      PostgreSQL, with MADlib overtop.
+
+      call to twitter sentiment . This is done as a udf calling python script which uses a JSON API.
+
+      Call to nltk for entity resolution.
 
       \begin{figure}
         \begin{center}
@@ -89,8 +125,11 @@
       \end{figure}
 
     \item What are the system components and statistical methods developed?
-      
+
     \item What are the final data products?
+
+      We don't have particular products, so much as abilities to deliver varying products.
+
       Query results
     \end{enumerate}
 
@@ -116,6 +155,13 @@
     \end{enumerate}
   \end{enumerate}
 \end{enumerate}
+
+References
+
+MADlib http://madlib.net/
+
+https://sites.google.com/site/twittersentimenthelp/
+
 \end{document}
 
 %%% Local Variables:
