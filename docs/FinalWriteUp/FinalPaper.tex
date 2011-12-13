@@ -195,6 +195,8 @@
 
       Resolving the multiple things with one name, was not tackled. (as far as I can tell mhb)
 
+      We also have a basic hookup to NLTK, to do basic named entity recognition.
+
     \item sentiment analysis
 
       Sentiment analysis extracts the polarity of subjective opinions from documents.
@@ -208,6 +210,9 @@
       Priority should be given to establish batch submissions,
       followed by writing the UDF as a local function,
       and possibly an in-database function.
+
+      JSON API.
+
 
     \item part of speech tagging
 
@@ -242,11 +247,6 @@
 
 
 
-
-
-    call to twitter sentiment . This is done as a udf calling python script which uses a JSON API.
-
-    Call to nltk for entity resolution.
 
     \begin{figure}
       \begin{center}
@@ -307,10 +307,14 @@
     % my description of document size is vague ~mhb
 
     Twitter -- unstructured, microblogs, very small document size (140 characters). This was gathered using the twitter trickle. With domain related terms, like NFL, Tim Tebow, Jets.
+    Approximately 9GB of tweets, yielding a 7GB inverted index.
 
     Blogs -- english language, small-medium document size, 10-100 sentences.
+    30k+ from official NFL teams, going back several years.
+    60k+ from ESPN as commentary going back several years.
 
     play-by-plays -- semi-structured, repeated patterns with specific meaning.
+    
 
     Measure of success?
 
