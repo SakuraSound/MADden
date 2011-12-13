@@ -87,11 +87,16 @@
 
     Sentiment
 
-    IE
+    Information Extraction (IE) is the concept of identifying objects of interest,
+    using relations present in the data.
+    This varies from simple relations between subjects,
+    to recognizing specific entities within text.
 
-    ER
+    Entity Resolution (ER) is the processing of recognizing and disambiguating different subjects in a document.
+    That is, recognizing that people are present,
+    or mentioned, and knowing who they are. 
 
-    POS Tagging
+    Part of Speech (POS) Tagging
 
     Conditional Random Fields (CRF) are a type of graphical model.
     A CRF is a supervised learning algorithm, requiring labeled training examples.
@@ -101,6 +106,7 @@
     We intended to use CRFs for POS tagging, IE, and ER.
 
     We have an implementation of the CRF evaluation, that uses a provided model, and labels sequences in the database.
+    This is done using the forward-backward algorithm and the Viterbi algorithm, which are both instances of dynamic programing.
 
     (viterbi, forward-backward, linear vs skip-chain) evaluation over pre-trained model done in database.
 
@@ -132,171 +138,180 @@
 
 
   \section{System Description (4 pages)}
+  \subsection{System Architecture}
+  What is the final system architecture?
+
+  {\system} is a four layered system, as can be seen in Figure \ref{fig:arch}.
+  The user interface is where both naive and advanced users can construct queries over text, structured data, and models.
+  From the user interface,
+  queries are then passed to the DBMS,
+  where MADLib and {\system} libraries sit on top of the query processor to add statistical and text processing functionality.
+  % These queries are processed using PostgreSQL/Greenplum's Parallel DB architecture to further optimize on replicated storage.
+
+
+  \subsection{System Components}
+  What are the system components and statistical methods developed?
+
+  PostgreSQL, with MADlib overtop.
+  Hope to scale up and use greenplum parallel DB.
+
+  There is a new feature for MADlib that implements CRF evaluation, but not training, in the database.
+  CRF specifically -
+
+  The full text search capabilities of PostgreSQL are leveraged,
+  as is the technique of inverted indexing.
+
+
+  Statistical Text Analysis Tools - in depth description of how they were performed.
   \begin{enumerate}
-  \item What is the final system architecture?
+  \item information extraction
 
-    {\system} is a four layered system, as can be seen in Figure \ref{fig:arch}.
-    The user interface is where both naive and advanced users can construct queries over text, structured data, and models.
-    From the user interface,
-    queries are then passed to the DBMS,
-    where MADLib and {\system} libraries sit on top of the query processor to add statistical and text processing functionality.
-    % These queries are processed using PostgreSQL/Greenplum's Parallel DB architecture to further optimize on replicated storage.
+    Verbatim from previous paper.
 
-  \item What are the system components and statistical methods developed?
+    Once we have the text documents, we would like to then be able to identify
+    objects of interest. Information Extraction methods become increasingly
+    important as the size of our corpus gets large. Many methods exist for in-database data
+    extraction, but we are currently focused on building upon existing work in
+    utilizing Conditional Random Fields (CRFs) for query-time extraction of
+    entities.
 
-    PostgreSQL, with MADlib overtop.
-    Hope to scale up and use greenplum parallel DB.
+    This would be applied to the unstructured twitter data,
+    and the semi-structured play-by-play data,
+    possibly with a specialized CRF for each of them.
+    As well, this would be applied for Named Entity Recognition purposes to general text, for identifying players and teams.
 
-    There is a new feature for MADlib that implements CRF evaluation, but not training, in the database.
-    CRF specifically -
+  \item entity resolution
 
-    The full text search capabilities of PostgreSQL are leveraged,
-    as is the technique of inverted indexing.
+    What it is -
+    This links various forms and representations of the same background object,
+    so that a query for one of them returns the results for all of them.
 
+    Why is it necessary -
+    This is necessary for two reasons,
+    the informality of speaking in documents like blog posts and twitter tweets,
+    which leads to misspellings and slang
+    and the more  general case of people or companies having many names to refer to them.
 
-    Statistical Text Analysis Tools - in depth description of how they were performed.
-    \begin{enumerate}
-    \item information extraction
+    Example of informality, slang \& misspelling. tmrw, tomorrow. NY Jest, NY Jets.
 
-      Verbatim from previous paper.
+    Example of multiple names for a person. Nickname for Larry Fitzgerald, Sticky Fingers. IBM, Big Blue. New York City, Big Apple.
 
-      Once we have the text documents, we would like to then be able to identify
-      objects of interest. Information Extraction methods become increasingly
-      important as the size of our corpus gets large. Many methods exist for in-database data
-      extraction, but we are currently focused on building upon existing work in
-      utilizing Conditional Random Fields (CRFs) for query-time extraction of
-      entities.
+    Example of multiple things with one name.
+    Arizona Cardinals, cardinals as a bird.
+    Miami Dolphins, dolphins as a fish, dolphins as a mammal
 
-    \item entity resolution
+    This is implemented through q-grams for misspellings and alternate spellings,
+    and an alias table for multiple names of an entity.
+    q-grams is the automatic approach that does fuzzy string matching,
+    with a threshold value that can be varied.
+    The alias table being hand constructed.
 
-      What it is -
-      This links various forms and representations of the same background object,
-      so that a query for one of them returns the results for all of them.
+    TODO: Q-grams - description and example here
 
-      Why is it necessary -
-      This is necessary for two reasons,
-      the informality of speaking in documents like blog posts and twitter tweets,
-      which leads to misspellings and slang
-      and the more  general case of people or companies having many names to refer to them.
+    Resolving the multiple things with one name, was not tackled. (as far as I can tell mhb)
 
-      Example of informality, slang \& misspelling. tmrw, tomorrow. NY Jest, NY Jets.
+    We also have a basic hookup to NLTK, to do basic named entity recognition.
 
-      Example of multiple names for a person. Nickname for Larry Fitzgerald, Sticky Fingers. IBM, Big Blue. New York City, Big Apple.
+  \item sentiment analysis
 
-      Example of multiple things with one name.
-      Arizona Cardinals, cardinals as a bird.
-      Miami Dolphins, dolphins as a fish, dolphins as a mammal
+    Sentiment analysis extracts the polarity of subjective opinions from documents.
+    The current implementation returns sentiment as a trinary option of positive, neutral, or negative.
+    We would like to have more gradations in the extremeness of the opinion,
+    as well as analysis of an opinion pertaining to a certain subject, or entity, that has been extracted.
 
-      This is implemented through q-grams for misspellings and alternate spellings,
-      and an alias table for multiple names of an entity.
-      q-grams is the automatic approach that does fuzzy string matching,
-      with a threshold value that can be varied.
-      The alias table being hand constructed.
+    Currently this is handled as a UDF which makes an out of database call across the network.
+    It also does this on a document by document basis,
+    when the submission API supports batches of documents.
+    Priority should be given to establish batch submissions,
+    followed by writing the UDF as a local function,
+    and possibly an in-database function.
 
-      Resolving the multiple things with one name, was not tackled. (as far as I can tell mhb)
-
-      We also have a basic hookup to NLTK, to do basic named entity recognition.
-
-    \item sentiment analysis
-
-      Sentiment analysis extracts the polarity of subjective opinions from documents.
-      The current implementation returns sentiment as a trinary option of positive, neutral, or negative.
-      We would like to have more gradations in the extremeness of the opinion,
-      as well as analysis of an opinion pertaining to a certain subject, or entity, that has been extracted.
-
-      Currently this is handled as a UDF which makes an out of database call across the network.
-      It also does this on a document by document basis,
-      when the submission API supports batches of documents.
-      Priority should be given to establish batch submissions,
-      followed by writing the UDF as a local function,
-      and possibly an in-database function.
-
-      JSON API.
+    JSON API.
 
 
-    \item part of speech tagging
+  \item part of speech tagging
 
-      Part of Speech Tagging (POS tagging) labels each token of a sequence with a tag based on the grammar of a natural language.
-      These tags are parts of speech, based on context and word definitions.
-      The generators for these tags can come from both supervised and unsupervised sources.
-      Statistical methods are used to generate taggers specific to a corpus, and thus a particular subject.
-      These parts of speech are useful in other stages, such as entity resolution and information extraction (ER \& IR).
+    Part of Speech Tagging (POS tagging) labels each token of a sequence with a tag based on the grammar of a natural language.
+    These tags are parts of speech, based on context and word definitions.
+    The generators for these tags can come from both supervised and unsupervised sources.
+    Statistical methods are used to generate taggers specific to a corpus, and thus a particular subject.
+    These parts of speech are useful in other stages, such as entity resolution and information extraction (ER \& IR).
 
-      Using CRF -
-      Initially trained on email headers.
-      This data was not generic enough to be useful.
-      The individual documents were to small and not of a form similar enough to ensure correct tags.
+    Using CRF -
+    Initially trained on email headers.
+    This data was not generic enough to be useful.
+    The individual documents were to small and not of a form similar enough to ensure correct tags.
 
-      The next CRF was trained using (email contents)? .
-      While it had a higher accuracy, the training corpus was probably too small (only 100 or 200 documents right?).
-      The tagging accuracy was higher than the previous CRFs
+    The next CRF was trained using (email contents)? .
+    While it had a higher accuracy, the training corpus was probably too small (only 100 or 200 documents right?).
+    The tagging accuracy was higher than the previous CRFs
 
-      We need to train a CRF specific to our domain,
-      and would like to train a CRF specific to each type of text,
-      such as a twitter CRF, a blog CRF, etc.
+    We need to train a CRF specific to our domain,
+    and would like to train a CRF specific to each type of text,
+    such as a twitter CRF, a blog CRF, etc.
 
-      Using NLTK -
-      Our current system does not utilize the CRF style model.
-      Instead, as a UDF, we make a call to the Python Natural Language Toolkit (NLTK).
-      (what kind of tagger is this? Brill? Naive Bayes? I don't know where the sourcecode is. ~mhb)
-      This returns the tagged data, which can be used in PostgreSQL for later stages of analysis.
+    Using NLTK -
+    Our current system does not utilize the CRF style model.
+    Instead, as a UDF, we make a call to the Python Natural Language Toolkit (NLTK).
+    (what kind of tagger is this? Brill? Naive Bayes? I don't know where the sourcecode is. ~mhb)
+    This returns the tagged data, which can be used in PostgreSQL for later stages of analysis.
 
-
-    \end{enumerate}
-
-
-
-
-
-    \begin{figure}
-      \begin{center}
-        \includegraphics[width=104mm]{architecture-1.png}
-        \caption{System Architecture}
-        \label{fig:architecture}
-      \end{center}
-    \end{figure}
-
-    \begin{figure}
-      \begin{center}
-        \includegraphics[scale=0.4]{arch.png}
-        \caption{{\system} architecture}
-        \label{fig:arch}
-      \end{center}
-    \end{figure}
-
-    \begin{figure}
-      \begin{center}
-        \includegraphics[scale=0.3]{web-ui.png}
-        \caption{{\system} Web UI}
-        \label{fig:web-ui}
-      \end{center}
-    \end{figure}
-
-
-
-  \item What are the final data products?
-
-    We don't have particular products, so much as abilities to deliver varying products.
-
-    Ad hoc queries
-
-    Query results
-
-    From first proposal:
-    \begin{enumerate}
-    \item[1] Correlations between game actions, such as:
-      \begin{enumerate}
-      \item[A] Outcome of coin toss for home/away team
-      \item[B] Probability of making field goal based on
-        stadium (by distance of attempt)
-      \item[C] Fan sentiment with game outcome.
-      \end{enumerate}
-    \item[2] Summary of team performance
-    \item[3] Tweet density for every game
-    \item[4] ... and other things yet to be discovered
-    \end{enumerate}
 
   \end{enumerate}
+
+
+
+
+
+  \begin{figure}
+    \begin{center}
+      \includegraphics[width=104mm]{architecture-1.png}
+      \caption{System Architecture}
+      \label{fig:architecture}
+    \end{center}
+  \end{figure}
+
+  \begin{figure}
+    \begin{center}
+      \includegraphics[scale=0.4]{arch.png}
+      \caption{{\system} architecture}
+      \label{fig:arch}
+    \end{center}
+  \end{figure}
+
+  \begin{figure}
+    \begin{center}
+      \includegraphics[scale=0.3]{web-ui.png}
+      \caption{{\system} Web UI}
+      \label{fig:web-ui}
+    \end{center}
+  \end{figure}
+
+
+
+
+  \subsection{Data Products}
+  What are the final data products?
+
+  We don't have particular products, so much as abilities to deliver varying products, and adapt to the data as it changes.
+
+  Ad hoc queries
+
+  From first proposal:
+  \begin{enumerate}
+  \item[1] Correlations between game actions, such as:
+    \begin{enumerate}
+    \item[A] Outcome of coin toss for home/away team
+    \item[B] Probability of making field goal based on
+      stadium (by distance of attempt)
+    \item[C] Fan sentiment with game outcome.
+    \end{enumerate}
+  \item[2] Summary of team performance
+  \item[3] Tweet density for every game
+  \item[4] ... and other things yet to be discovered
+  \end{enumerate}
+
+
 
 
   \section{Experiments (2 pages)}
@@ -314,7 +329,7 @@
     60k+ from ESPN as commentary going back several years.
 
     play-by-plays -- semi-structured, repeated patterns with specific meaning.
-    
+
 
     Measure of success?
 
@@ -339,12 +354,12 @@
 
     What kinds of Data Science tools/systems are needed?
 
-    Morgan - 
+    Morgan -
     Some type of generic universal web crawling interface would be nice.
     Then a standard way to specify exactly which parts you want in a generic way.
     As it is, there is a need to almost write the same parser/cleaner, for each datasource, and the datasources may change at any time.
 
-   
+
   \end{enumerate}
 \end{enumerate}
 
