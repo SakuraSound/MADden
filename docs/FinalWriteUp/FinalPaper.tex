@@ -6,7 +6,7 @@
 
 \usepackage{xspace}
 \usepackage{graphicx}
-
+\usepackage{color}
 \newcommand{\system}{MADden\xspace}
 
 \title{MADden : In-Database Text Analytics}
@@ -233,7 +233,19 @@
     with a threshold value that can be varied.
     The alias table being hand constructed.
 
-    TODO: Q-grams - description and example here
+
+  \item TODO: Q-grams - description and example here
+
+    \begin{tabular}{cc}
+      VOTKA & VODKA \\ \hline
+      {\color{green}\#\#V} & {\color{green}\#\#V} \\
+      {\color{green}\#VO} & {\color{green}\#VO} \\
+      {\color{red}VOT} &  {\color{red}VOD} \\
+     {\color{red} OTK} &{\color{red} ODK} \\
+     {\color{red} TKA} &{\color{red} DKA} \\
+      {\color{green}KA\$} & {\color{green}KA\$} \\
+        {\color{green}A\$\$} &  {\color{green}A\$\$} \\
+    \end{tabular}
 
     Resolving the multiple things with one name, was not tackled. (as far as I can tell mhb)
 
