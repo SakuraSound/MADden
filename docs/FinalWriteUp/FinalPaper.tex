@@ -7,6 +7,7 @@
 \usepackage{xspace}
 \usepackage{graphicx}
 \usepackage{color}
+\usepackage{geometry}
 \newcommand{\system}{MADden\xspace}
 
 \title{MADden : In-Database Text Analytics}
@@ -198,8 +199,8 @@
 
 
   Statistical Text Analysis Tools - in depth description of how they were performed.
-  \begin{enumerate}
-  \item information extraction
+
+    \subsubsection{Information Extraction}
 
     Verbatim from previous paper.
 
@@ -215,7 +216,9 @@
     possibly with a specialized CRF for each of them.
     As well, this would be applied for Named Entity Recognition purposes to general text, for identifying players and teams.
 
-  \item entity resolution
+
+    \subsubsection{Entity Resolution}
+    \label{sec:SCER}
 
     What it is -
     This links various forms and representations of the same background object,
@@ -246,7 +249,10 @@
     The alias table being hand constructed.
 
 
-  \item TODO: Q-grams - description and example here
+    \subsubsection{TODO: q-grams}
+    \label{qgram}
+
+    description and example here
 
     \begin{tabular}{cc}
       VOTKA & VODKA \\ \hline
@@ -263,7 +269,8 @@
 
     We also have a basic hookup to NLTK, to do basic named entity recognition.
 
-  \item sentiment analysis
+    \subsubsection{Sentiment Analysis}
+    \label{sec:SCSA}
 
     Sentiment analysis extracts the polarity of subjective opinions from documents.
     The current implementation returns sentiment as a trinary option of positive, neutral, or negative.
@@ -279,8 +286,7 @@
 
     JSON API.
 
-
-  \item part of speech tagging
+    \subsubsection{Part of Speech Tagging}
 
     Part of Speech Tagging (POS tagging) labels each token of a sequence with a tag based on the grammar of a natural language.
     These tags are parts of speech, based on context and word definitions.
@@ -306,13 +312,6 @@
     Instead, as a UDF, we make a call to the Python Natural Language Toolkit (NLTK).
     (what kind of tagger is this? Brill? Naive Bayes? I don't know where the sourcecode is. ~mhb)
     This returns the tagged data, which can be used in PostgreSQL for later stages of analysis.
-
-
-  \end{enumerate}
-
-
-
-
 
   \begin{figure}
     \begin{center}
