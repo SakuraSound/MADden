@@ -9,6 +9,81 @@
 		<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
     <script language='javascript' src='http://embedtweet.com/javascripts/embed_v2.js'></script>
 		<script type="text/javascript" src="prettify/prettify.js"></script>
+		<script type="text/javascript" src="jsontohtml.js"></script>
+		<script type='text/javascript'>
+<?php
+		$comments = trim($_GET['comments']);
+		$white = array("\t","\n","\r","\0","\x0B"); 
+		$comments = str_replace( $white, " ", addslashes($comments));
+
+	$num = $_GET['num'];
+	$K = $_GET['K'];
+
+$playertable = "passingstats";
+	if($_GET['pos'] == 'rb') {
+		$playertable = "rushingstats";
+	}
+	else if($_GET['pos'] == 'wr') {
+		$playertable = "recievingstats";
+	}
+
+
+$query = "SELECT topKplayers.full_name, twtext, cgrant_sentiment(twtext) ".
+				"FROM tweets, (SELECT first || ' ' || last as full_name, total_yards, touchdowns ".
+			        "FROM $playertable ".
+              "ORDER BY total_yards DESC, touchdowns DESC ".
+              "LIMIT $K) as topKplayers ".
+"WHERE cgrant_distance(1, topKplayers.full_name, 2, twtext, 5) > .5 ".
+"LIMIT $num;";
+
+
+		//echo "var query = \"".urlencode($query)."\";";
+		echo "var query = \"$query\";\n";
+?>
+		$.ajax({
+			type: "GET",
+			url: "http://www.cise.ufl.edu:/~cgrant/MADden/query.php",
+			contentType: "application/json; charset=utf-8",
+			//contentType: "application/json",
+			dataType: "json",
+			data: {q: query},
+			//data: query,
+			success: function(res) {
+				$('#results').empty();
+				//$('#results').append(CreateTableView(res)).fadeIn();
+				var resdiv = [];
+			
+				//resdiv.push("<table>");	
+				for (var i=0; i < res["rowcount"]; ++i){
+					// Check sentiment
+					var sent = "warning";
+					if(res[i]["cgrant_sentiment"] == '+'){
+						sent = "success";
+					}
+					else if(res[i]["cgrant_sentiment"] == '-'){
+						sent = "error";
+					}
+					var patt = new RegExp(res[i]["full_name"],"gi");
+					var tweettext = res[i]["twtext"].replace(patt,"<strong>"+res[i]["full_name"]+"</strong>");
+					resdiv.push("<div class='alert-message block-message "+sent+"'>");	
+					resdiv.push(tweettext);
+					resdiv.push("</div>\n");
+					//resdiv.push("<tr>");
+					//	resdiv.push("<td>");
+					//		resdiv.push(res[i]["full_name"]);
+					//	resdiv.push("</td>");
+					//resdiv.push("</tr>");
+				}
+				//resdiv.push("</table>");
+
+				$("#querytime").empty();
+				$("#querytime").append(res["querytime"] +" secs");
+				$("#results").append(resdiv.join(" "));	
+			}			
+	});
+	
+
+		</script>
 		<!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]--><style type="text/css">
@@ -97,24 +172,12 @@
 //ini_set('display_errors', '1');
 
 // Connecting, selecting database
-$dbconn = pg_connect("host=128.227.176.46 dbname=madlibdb user=john password=madden options='--client_encoding=UTF8'")
-    or die('Could not connect: ' . pg_last_error());
+error_log($query."\n\n5------------", 3, 'query.log');
 
-$comments = trim($_GET['comments']);
-$white = array("\t","\n","\r","\0","\x0B"); 
-$comments = str_replace( $white, " ", addslashes($comments));
-
-$query = "select termnum, term ".
-	"from cgrant_ne_chunk('$comments', true) ".
-	"where tag = 'NE' ".
-	";";
-
-error_log($query."\n\n4------------", 3, 'query.log');
-
-		list($tic_usec, $tic_sec) = explode(" ", microtime());
-		$result = pg_query($query) or die('Query failed: ' . pg_last_error());
-		list($toc_usec, $toc_sec) = explode(" ", microtime());
-		$querytime = $toc_sec + $toc_usec - ($tic_sec + $tic_usec);
+		//list($tic_usec, $tic_sec) = explode(" ", microtime());
+		//$result = pg_query($query) or die('Query failed: ' . pg_last_error());
+		//list($toc_usec, $toc_sec) = explode(" ", microtime());
+		//$querytime = $toc_sec + $toc_usec - ($tic_sec + $tic_usec);
 ?>	
 
 			<div class="content">
@@ -128,14 +191,7 @@ error_log($query."\n\n4------------", 3, 'query.log');
             <h2>Answer</h2>
 						<?php
 							// Printing results in HTML
-							echo "<table class='zebra-stripes'>\n";
-							while ($line = pg_fetch_array($result, null, PGSQL_ASSOC)) {
-									echo "\t<tr>\n";
-									echo "<td>".$line['termnum']."</td>";
-									echo "<td>".$line['term']."</td>";
-									echo "\t</tr>\n";
-							}
-							echo "</table>\n";
+							echo "<div id='results'> <img src='images/ajax-loader.gif'/></div>";
 						?>
           </div>
           <div class="span4">
@@ -147,7 +203,7 @@ error_log($query."\n\n4------------", 3, 'query.log');
 							echo "</code>";
 							//echo "</pre>";
 							echo "<div class=\"alert-message info\">";
-							echo "<p>".($querytime)." sec </p>";
+							echo "<p id='querytime'> ... </p>";
 							echo "</div> <!-- alert -->";
 						?>
           </div>

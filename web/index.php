@@ -75,7 +75,7 @@
 					<!-- query 1 -->
 					<form action="query1.php" method="GET">
 						Give me 
-						<input name="num" type="range" min="1" max="20" value="5" step="1"
+						<input name="num"  class="small" type="range" min="1" max="20" value="5" step="1"
 						onchange="slider('1range',this.value)"/>
 						<span id="1range">5</span>
 						<select name="sent" type="normalSelect" class="mini">
@@ -103,7 +103,7 @@
 						to
 						<input type="text" id="to1" name="to1" class="mini"/>
 						and return
-						<input name="num" type="range" min="1" max="100" value="5" step="1"
+						<input name="num"  class="small" type="range" min="1" max="100" value="5" step="1"
 						onchange="slider('2range',this.value)"/>
 						<span id="2range">20</span> 
 						results.
@@ -123,13 +123,13 @@
 						</select>	
 						sentiment for the  
 					top 
-						<input name="num" type="range" min="1" max="20" value="5" step="1"
+						<input name="num"  class="small" type="range" min="1" max="20" value="5" step="1"
 						onchange="slider('3range',this.value)"/>
 						<span id="3range">5</span>
-						<select name="sent" type="normalSelect" class="mini">
+						<select name="pos" type="normalSelect" class="mini">
 							<option value="rb">running backs</option>
 							<option value="qb">quarter backs</option>
-							<option value="wr">wide reciever</option>
+							<option value="wr">wide receiver</option>
 						</select>
 						for tweets.<br/> 
 						<input name="q" type="submit" class="primary btn" value="Query 3"/>
@@ -144,6 +144,27 @@ Kirn began his career in psychology, graduating from UF with a master’s degree
 						</textarea>
 						<input name="q" type="submit" class="primary btn" value="Query 4"/>
 					</form>
+
+
+					<form action="query5.php" method="GET">
+					Give me the
+						<input name="num"  class="small" type="range" min="1" max="100" value="50" step="1"
+						onchange="slider('51range',this.value)"/>
+						<span id="51range">20</span> 
+					tweets and their sentiment corresponding to one of the
+				 top
+						<input name="K" class="small" type="range" min="1" max="100" value="5" step="1"
+						onchange="slider('52range',this.value)"/>
+						<span id="52range">20</span> 
+						<select name="pos" type="normalSelect" class="mini">
+							<option value="rb">running backs</option>
+							<option value="qb">quarter backs</option>
+							<option value="wr">wide receiver</option>
+						</select>
+					.
+						<input name="q" type="submit" class="primary btn" value="Query 5"/>
+					</form>
+
 
 					<hr/>
 				</div> <!-- .span10 -->

@@ -147,7 +147,7 @@ def load(jsonfile):
 
 if __name__ == '__main__':
 	import pdb
-	pdb.set_trace()
+	#pdb.set_trace()
 	if len(sys.argv) <= 1 or not os.path.isfile(sys.argv[1]):
 		print "Usage: python tweet_load.py <file.json>"
 		print "The file must not end with a separator"

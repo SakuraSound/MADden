@@ -104,11 +104,12 @@ $num = $_GET['num'];
 $player = implode("&", explode(" ", $_GET["player"]));
 $sent = htmlspecialchars($_GET['sent']);
 	// Build query
+
 $playertable = "passingstats";
-	if($_GET['rb']) {
+	if($_GET['pos']) {
 		$playertable = "rushingstats";
 	}
-	else if($_GET['rb']) {
+	else if($_GET['pos']) {
 		$playertable = "recievingstats";
 	}
 
