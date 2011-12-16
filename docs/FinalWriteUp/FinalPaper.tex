@@ -1,14 +1,17 @@
-\documentclass{article}
+\documentclass[11pt]{article}
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,amsfonts}
+\usepackage{fullpage}
 
 \usepackage{xspace}
 \usepackage{graphicx}
 \usepackage{color}
 \usepackage{geometry}
 \newcommand{\system}{MADden\xspace}
+
+\newcommand{\ceg}[1]{{\textcolor{green}{#1 -- CEG}}}
 
 \title{MADden : In-Database Text Analytics}
 \author{Morgan Bauer 9890-4838 \\
@@ -21,87 +24,101 @@
 \begin{figure}
   \begin{center}
     \includegraphics[width=104mm]{logo.jpg}
-    \caption{logo for overarching project}
+   %\includegraphics[width=4cm]{logo.jpg}
+    \caption{Logo for overarching project.}
     \label{fig:logo}
   \end{center}
 \end{figure}
 
-\begin{enumerate}
-\item Names of the group members and UFIDs
 
-  % not sure if it's best to put this into the public with our uf-id on it ~mhb
+\begin{abstract}
+In many domains, structured data and unstructured text are
+both important natural resources to fuel data analysis. Statistical
+text analysis needs to be performed over the text data to extract
+structured information for further query processing. Common practice
+in industry requires developers to connect multiple tools to build
+off-line batch processes to perform such analysis tasks. \system is
+an integrated system for ad hoc real-time query processing over
+structured and unstructured data. \system is built on top of MADlib,
+and PostgreSQL/Greenplum, and integrates in-database text extraction
+techniques from BayesStore. This demonstration uses two application
+domains---computation journalism and political campaign
+management---to show (1) real-time processing of ad hoc queries
+involving statistical text analysis; (2) joining between structured
+and textual data; and (3) query-time rendering of
+visualizations over the query result.
+\end{abstract}
 
-  Morgan Bauer
-
-  Christan Grant
-
-  Joir-dan Gumbs
-
-\item Title of the project and abstract
-
-  MADden : In-Database Text Analytics
-
-  ABSTRACT
 
 
 
-\item Final report should include the following topics:
+  \section{Introduction}
 
-  \section{Introduction (1 page)}
-
-  MADlib, MAD, Magnetic Agile Deep.
-  Madlibs, fill in the blank games, that usually have amusing and unforeseen outcomes.
-  MADden, our initial problem domain deals with football,
-  and John Madden is a famous former player, coach, and commentator,
-  also known for the long-running series of video games that bear his name.
+  \textbf{\system, MAD, Magnetic Agile Deep.}
+  Mad Libs is a classic fill in the blank game that usually have amusing and unforeseen outcomes.
+  In the \system project, our initial problem domain deals with football,
+  and John Madden is a hall of fame coach, former player, and former commentator.
+	He is most popular
+  for the long-running series of video games that bear his name.
 
   \begin{enumerate}
   \item The problem statement and a summary of the main contributions and results of the project.
 
-    Problem is he large amounts of structured and unstructured data that is available, and how to intermix the two.
-    We use statistical text analysis techniques to extract structured information from unstructured data,
-    and pass this on to later stages for further processing.
+    There are large amounts of structured and unstructured data that is freely available,
+		we create a proof of concept system to show how to intermix the two.
+    We use statistical text analysis techniques to extract structured information from unstructured 
+		data, and pass this on to later stages for further processing.
 
-    We provide the ability to run queries over heterogeneous data such as structured statistical facts and unstructured natural language.
+    We provide the ability to run queries over heterogeneous data such as structured statistical 
+		fact tables and unstructured natural language.
 
-    Scraping dirty data and turning it into clean information, and then presenting the information in an easy to digest form.
+    Additionally, we  scrape dirty data and turn it into clean information, and then presenting 
+		the information in an easy to digest form.
 
-
-    Goal of tinkering with sports data for gaining insight of team/player performance and fan sentiment.'
+    We want to create queries over sports data to gain insight of a player and/or teams
+		performance along with fan sentiment.
 
     We do however hope to be generic, and liberal in the data we take in, so that the same techniques can be applied to multiple domains.
 
-    There is a web interface that provides preassembled queries that can be filled in like the madlibs game.
+    There is a web interface that provides pre-created web form queries that can be filled in 
+		like the Mad Libs game.
     It serves as a proving ground for various queries we test and run.
+		Additionally, we create visualization of the results in html and using charts.
 
   \item What is the responsibility of each member of the group?
 
 
+   \textbf{Morgan} did consulting work among the various group members, and between groups.
+    Official NFL team blogs. NFL stats from cbssports.com. He also led in the creation of the paper.
+		
+		\textbf{Christan} built the \system website -- including the Mad lib style interface and the 
+		result page with the charts and graphs. He obtained the tweet corpus, created the functionality
+		for entity resolution, information extraction, and sentiment analysis. He also helped Morgan
+		write the final paper.
 
-    Morgan did consulting work among the various group members, and between groups.
-    Official NFL team blogs. NFL stats from cbssports.com.
+		\textbf{Joir-dan} Joir-dan obtained play-by-play data from ESPN.com, CBS sports, blogs,
+		and news recap articles.
+		He also came up with queries for the web site.
+
   \end{enumerate}
 
-  \section{Background (1 page)}
+  \section{Background}
   \subsection{Domain}
 
-  Our initial domain is the National Football League (NFL).
-  This would be useful for a sports journalist to do computational/digital journalism.
-  Covering all 32 teams with more than 1700 players is made manageable.
+  Our initial domain is a sports domain and more specifically the National Football League (NFL).
+  This domain is relevant for to sports journalist to do computational journalism.
+  Covering all 32 teams with more than 1700 players is a time consuming task.
   A sports journalist would need a system
   that can analyze both the
   structured statistics (e.g., scores, biographic data) of teams and players and the
   unstructured tweets, blogs, and news about the games.
+	Additionally, a coaches and scouts would find use in creating statistical queries over NFL data.
 
 
 
   \subsection{Background Information}
-  \begin{enumerate}
-  \item Background information (basic concepts, algorithms, etc.)
 
 
-
-  \item Statistical Text Analysis Tools - list them and give a short description
 
     Text analysis uses the state-of-the-art statistical machine learning (SML) methods to extract structured information,
     such as entities, relations, sentiments, topics, from text.
@@ -111,9 +128,14 @@
     journalist may want to join the sentiment result from tweets and the
     scores of the Arizona Cardinals\footnote{http://www.azcardinals.com}
     (NFL Team) to see their correlations.
+		Below we discuss the algorithms we use.
 
+  \begin{enumerate}
 
-  \item Part of Speech (POS) Tagging is the basis of further querying.
+  \item Part of Speech (POS) Tagging
+
+	We used part of speech taking from the natural language toolkit (NLTK). 
+	The calls for POS tagging was wrapped into a Postgres user-defined function.
 
 
   \item Sentiment
@@ -122,19 +144,28 @@
     These subjective feelings are important for assessing the popularity of subjects,
     and can be used to establish the collective feelings of the public on a subject.
 
-  \item Information Extraction (IE) is the concept of identifying objects of interest,
+
+  \item Information Extraction (IE) 
+
+	IE is the concept of identifying objects of interest,
     using relations present in the data.
     This varies from simple relations between subjects,
     to recognizing specific entities within text.
+		For example, we may want to extract all the `organizations' mentioned in a 
+		a news article.
 
 
-  \item Entity Resolution (ER) is the processing of recognizing and disambiguating different subjects in a document.
+  \item Entity Resolution (ER) 
+	
+		ER is the processing of recognizing and disambiguating different subjects in a document.
     That is, recognizing that people are present,
     or mentioned, and knowing who they are.
 
     Where as IE was concerned about the existence of various objects,
     and identifying their existence,
     ER is concerned with taking these entities and knowing whether they are the same or different.
+		In may situations, the output of information extraction becomes the input 
+		to an entity resolution task.
 
 
   \item Conditional Random Fields (CRF) are a type of graphical model.
@@ -144,65 +175,56 @@
     They can be used for different things depending on their training set.
     We intended to use CRFs for POS tagging, IE, and ER.
 
-    We have an implementation of the CRF evaluation, that uses a provided model, and labels sequences in the database.
-    This is done using the forward-backward algorithm and the Viterbi algorithm, which are both instances of dynamic programing.
-
-    (viterbi, forward-backward, linear vs skip-chain) evaluation over pre-trained model done in database.
-
-  \end{enumerate}
+     \end{enumerate}
   \subsection{Related work}
 
-  related work
-
-  MADlib, directly
-
-  NLTK, POS Tagging, among other things.
-
-  Twitter sentiment, for twitter sentiment. maybe reference whatever is being worked on with Wilson involving this.
-
-  IIT for CRF training.
-
-  Wang et al. for idea of doing CRF in database
-
-  \subsection{Our Uniquness}
-  How is this project different from related work
-
-  Integration of analysis queries into the database.
-  Ability to build ad hoc queries, as if they fit.
-
-  Using {\system} we are able to perform a declarative query over the data set to return related documents.
+Several similar systems have been created by companies for 
+internal and specific tasks
+As far as we know, \system is the only system to integrate as much text analytic
+tasks into a single query interface allowing the ability to 
+create ad hoc queries, as if they fit.
   This is a ``what we want, not how to get it'' style query.
+
+In computational journalism, the panda project\footnote{http://blog.apps.chicagotribune.com/}  
+is a new effort to allows journalists to search and find relationship between 
+many news stories. However, their system does not provide the same type of 
+query interface.
+The Tweelq project was created at MIT and it allowed a query interface for 
+sentiment analysis over tweets. They created a parser for SQL and 
+sampled the live twitter stream.
+
+Daisy Wang \cite{wang2011hybrid} developed in-database techniques for 
+conditional random fields. Our system aim to also have a completely in-database
+text analytics stack.
+
 
   \section{System Description (4 pages)}
   \subsection{System Architecture}
-  What is the final system architecture?
+  %What is the final system architecture?
 
   {\system} is a four layered system, as can be seen in Figure \ref{fig:arch}.
   The user interface is where both naive and advanced users can construct queries over text, structured data, and models.
   From the user interface,
   queries are then passed to the DBMS,
-  where MADLib and {\system} libraries sit on top of the query processor to add statistical and text processing functionality.
+  where MADLib \footnote{http://madlib.net/} and {\system} libraries sit on top of the query processor to add statistical and text processing functionality.
   % These queries are processed using PostgreSQL/Greenplum's Parallel DB architecture to further optimize on replicated storage.
 
 
   \subsection{System Components}
-  What are the system components and statistical methods developed?
+  %What are the system components and statistical methods developed?
 
-  PostgreSQL, with MADlib overtop.
-  Hope to scale up and use greenplum parallel DB.
+  \system uses PostgreSQL, with MADlib overtop.
+  We hope to scale up and use Greenplum massively parallel processing database.
 
-  There is a new feature for MADlib that implements CRF evaluation, but not training, in the database.
-  CRF specifically -
-
+  There is a new feature for MADlib that implements CRF evaluation, but not 
+	training, in the database.
   The full text search capabilities of PostgreSQL are leveraged,
   as is the technique of inverted indexing.
 
-
-  Statistical Text Analysis Tools - in depth description of how they were performed.
+	In addition, we developed our own text analytic functions, these are
+	described below.
 
     \subsubsection{Information Extraction}
-
-    Verbatim from previous paper.
 
     Once we have the text documents, we would like to then be able to identify
     objects of interest. Information Extraction methods become increasingly
@@ -211,35 +233,37 @@
     utilizing Conditional Random Fields (CRFs) for query-time extraction of
     entities.
 
-    This would be applied to the unstructured twitter data,
-    and the semi-structured play-by-play data,
-    possibly with a specialized CRF for each of them.
+    This is applied to the unstructured twitter data,
+    and the semi-structured play-by-play data.
     As well, this would be applied for Named Entity Recognition purposes to general text, for identifying players and teams.
+		Presently, we rely on models built by nltk to perform part-of-speech 
+		tagging and subsequently information extraction. NLTK can label 
+		terms and tag them with the label type. 
 
 
     \subsubsection{Entity Resolution}
     \label{sec:SCER}
 
-    What it is -
-    This links various forms and representations of the same background object,
+    ER links various forms and representations of the same background object,
     so that a query for one of them returns the results for all of them.
-
-    Why is it necessary -
     This is necessary for two reasons,
     the informality of speaking in documents like blog posts and twitter tweets,
     which leads to misspellings and slang
     and the more  general case of people or companies having many names to refer to them.
 
-    Example of informality, slang \& misspelling. tmrw, tomorrow. NY Jest, NY Jets.
+    An example of the informality of the slang \& misspellings in twitter is
+		``tmrw'' for ``tomorrow'' and ``NY Jest'' vs ``NY Jets''. Sometime 
+		misspellings are intensional.
 
-    Example of multiple names for a person.
-    Nickname for Larry Fitzgerald, Sticky Fingers.
-    Company Name and Acronym and Nickname, International Business Machines, IBM, Big Blue.
-    New York City, Big Apple.
+    An example of a person having multiple names is the
+    nickname for Larry Fitzgerald which is ``Sticky Fingers''.
+		Companies may also have acronym and nickname
+    for example ``International Business Machines'' vs ``IBM'' and ``Big Blue''.
+    and ``New York City'' vs ``Big Apple''.
 
-    Example of multiple things with one name.
-    Arizona Cardinals, cardinals as a bird.
-    Miami Dolphins, dolphins as a fish, dolphins as a mammal
+    An example of multiple things with one name is
+    Arizona Cardinals vs cardinals as a bird,
+    Miami Dolphins vs dolphins as a fish and dolphins as a mammal.
 
 
     This is implemented through q-grams for misspellings and alternate spellings,
@@ -249,25 +273,77 @@
     The alias table being hand constructed.
 
 
-    \subsubsection{TODO: q-grams}
+    \subsubsection{Q-grams}
     \label{qgram}
 
-    description and example here
+		Qgrams also known as character ngrams is implemented inside of the database.
+		We can run a window function over strings for extract qgrams.
+		Comparing the created qgrams of strings gives use an approximate string
+		matching technique.
+		We are implement it in pure database so it works well with MPP systems.
+		Given a string \textcolor{blue}{Tim Tebow} we can create a 3-gram by 
+		using a sliding window.
+		
+		\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Position} & \textbf{3-gram} \\
+		\hline
+		$1$ & \#\#T \\
+		\hline
+		$2$ & \#TI \\
+		\hline
+		$3$ & TIM \\
+		\hline
+		$4$ & IM\_ \\
+		\hline
+		$5$ & M\_T \\
+		\hline
+		$6$ & \_TE \\
+		\hline
+		$7$ & TEB \\
+		\hline
+		$8$ & EBO \\
+		\hline
+		$9$ & BOW \\
+		\hline
+		$10$ & OW\% \\
+		\hline
+		$11$ & W\%\% \\
+		\hline
+		\end{tabular}
 
-    \begin{tabular}{cc}
-      VOTKA & VODKA \\ \hline
-      {\color{green}\#\#V} & {\color{green}\#\#V} \\
-      {\color{green}\#VO} & {\color{green}\#VO} \\
+Given two tables we can compare the overlap of two qgrams and compute a
+similarity. The we compute the similarity using the equation
+$$ S(table1,table2) = \frac{|table1 \cap table2|}{\min\{|table1|, |table2|\}}$$
+
+Qgram approach may fail with small words with error in the center. An 
+example of this is displayed in the VOTKA vs VODKA example below.
+
+    \begin{tabular}{|c|c|}
+		\hline
+      \textbf{VOTKA} & \textbf{VODKA} \\ \hline
+      {\color{blue}\#\#V} & {\color{blue}\#\#V} \\
+		\hline
+      {\color{blue}\#VO} & {\color{blue}\#VO} \\
+		\hline
       {\color{red}VOT} &  {\color{red}VOD} \\
+		\hline
       {\color{red} OTK} &{\color{red} ODK} \\
+		\hline
       {\color{red} TKA} &{\color{red} DKA} \\
-      {\color{green}KA\$} & {\color{green}KA\$} \\
-      {\color{green}A\$\$} &  {\color{green}A\$\$} \\
+		\hline
+      {\color{blue}KA\$} & {\color{blue}KA\$} \\
+		\hline
+      {\color{blue}A\%\%} &  {\color{blue}A\%\%} \\
+		\hline
     \end{tabular}
 
-    Resolving the multiple things with one name, was not tackled. (as far as I can tell mhb)
+In general the qgram approach is very approximate and loses accuracy with
+large documents.
+Run time for search is $O(|T|*|P|)$ where $|T|$ and $|P|$ is the text and
+search pattern.\footnote{For large documents preprocessing tricks are
+available}
 
-    We also have a basic hookup to NLTK, to do basic named entity recognition.
 
     \subsubsection{Sentiment Analysis}
     \label{sec:SCSA}
@@ -277,46 +353,37 @@
     We would like to have more gradations in the extremeness of the opinion,
     as well as analysis of an opinion pertaining to a certain subject, or entity, that has been extracted.
 
-    Currently this is handled as a UDF which makes an out of database call across the network.
+    Currently, this is handled as a UDF which makes an out of database call across the network.
     It also does this on a document by document basis,
-    when the submission API supports batches of documents.
+    when the submission API supports batches of documents\footnote{https://sites.google.com/site/twittersentimenthelp/}.
     Priority should be given to establish batch submissions,
     followed by writing the UDF as a local function,
     and possibly an in-database function.
 
-    JSON API.
-
     \subsubsection{Part of Speech Tagging}
-
     Part of Speech Tagging (POS tagging) labels each token of a sequence with a tag based on the grammar of a natural language.
     These tags are parts of speech, based on context and word definitions.
     The generators for these tags can come from both supervised and unsupervised sources.
     Statistical methods are used to generate taggers specific to a corpus, and thus a particular subject.
     These parts of speech are useful in other stages, such as entity resolution and information extraction (ER \& IR).
 
-    Using CRF -
-    Initially trained on email headers.
-    This data was not generic enough to be useful.
+    
+    The model was initially trained on email headers.
+    This data was not generic enough to be useful in our tweet and news corpus.
     The individual documents were to small and not of a form similar enough to ensure correct tags.
 
-    The next CRF was trained using (email contents)? .
-    While it had a higher accuracy, the training corpus was probably too small (only 100 or 200 documents right?).
-    The tagging accuracy was higher than the previous CRFs
+    The next CRF was trained using email contents.
+    While it had a higher accuracy, the training corpus was still too
+		small at only 100 or 200 documents.
 
     We need to train a CRF specific to our domain,
     and would like to train a CRF specific to each type of text,
     such as a twitter CRF, a blog CRF, etc.
 
-    Using NLTK -
-    Our current system does not utilize the CRF style model.
-    Instead, as a UDF, we make a call to the Python Natural Language Toolkit (NLTK).
-    (what kind of tagger is this? Brill? Naive Bayes? I don't know where the sourcecode is. ~mhb)
-    This returns the tagged data, which can be used in PostgreSQL for later stages of analysis.
-
   \begin{figure}
     \begin{center}
       \includegraphics[width=104mm]{architecture-1.png}
-      \caption{System Architecture}
+      \caption{Original System Architecture}
       \label{fig:architecture}
     \end{center}
   \end{figure}
@@ -324,7 +391,7 @@
   \begin{figure}
     \begin{center}
       \includegraphics[scale=0.4]{arch.png}
-      \caption{{\system} architecture}
+      \caption{{Our updated \system} architecture}
       \label{fig:arch}
     \end{center}
   \end{figure}
@@ -333,42 +400,43 @@
   \begin{figure}
     \begin{center}
       \includegraphics[scale=0.3]{altachitecture.png}
-      \caption{{\system} architecture}
+      \caption{Overall {\system} architecture}
       \label{fig:altarch}
     \end{center}
   \end{figure}
 
 
-  \begin{figure}
-    \begin{center}
-      \includegraphics[scale=0.3]{altarchitecture2.jpg}
-      \caption{{\system} architecture 2}
-      \label{fig:altarch2}
-    \end{center}
-  \end{figure}
+  %\begin{figure}
+  %  \begin{center}
+  %    \includegraphics[scale=0.3]{altarchitecture2.jpg}
+  %    \caption{{\system} architecture 2}
+  %    \label{fig:altarch2}
+  %  \end{center}
+  %\end{figure}
 
 
 
   \subsection{Data Products}
-  What are the final data products?
 
   We don't have particular products, so much as abilities to deliver varying products, and adapt to the data as it changes.
 
-  Ad hoc queries
 
-  From first proposal:
-  \begin{enumerate}
-  \item[1] Correlations between game actions, such as:
-    \begin{enumerate}
-    \item[A] Outcome of coin toss for home/away team
-    \item[B] Probability of making field goal based on
-      stadium (by distance of attempt)
-    \item[C] Fan sentiment with game outcome.
-    \end{enumerate}
-  \item[2] Summary of team performance
-  \item[3] Tweet density for every game
-  \item[4] ... and other things yet to be discovered
-  \end{enumerate}
+	We created a set of tools to query over data and extract knowledge.
+	We created a website to interface with the database and visualize results.
+
+
+	We developed 5  Mad Lib style queries including;
+	\begin{enumerate}
+	\item Give me [number] [+/-/o] sentiment comments about [Player].
+	\item Compare [Player1][Player2] by the twitter sentiment	over dates from
+	[date one] and [data two] and return [number] results.
+	\item Give me the [+/-/o] sentiment for the top [number] 
+	[running back/quarter back/ wide receiver] for tweets.
+	\item Return all the named entity tags from the text [text].
+	\item Give me th [number] tweets and their sentiment corresponding to 
+	one of the top [number]  [running back/quarter back/ wide receiver].
+	\end{enumerate}
+
 
   \begin{figure}
     \begin{center}
@@ -380,60 +448,58 @@
 
   \section{Experiments (2 pages)}
   \begin{enumerate}
-  \item What datasets have been used? What’s the measure of success?
+    \item Data
 
-    Datasets
-    % my description of document size is vague ~mhb
-
-    Twitter -- unstructured, microblogs, very small document size (140 characters). This was gathered using the twitter trickle. With domain related terms, like NFL, Tim Tebow, Jets.
+		Twitter -- unstructured, microblogs, very small document size (140 characters). This was gathered using the twitter trickle. With domain related terms, like NFL, Tim Tebow, Jets.
     Approximately 9GB of tweets, yielding a 7GB inverted index.
 
     Blogs -- english language, small-medium document size, 10-100 sentences.
     30k+ from official NFL teams, going back several years.
     60k+ from ESPN as commentary going back several years.
 
-    play-by-plays -- semi-structured, repeated patterns with specific meaning.
+    Play-by-plays -- semi-structured, repeated patterns with specific meaning.
 
+	\item Measure of success
 
-    Measure of success?
+		We were able to create queries that gave interesting results.
+		We consider this work a success.
 
-    Do we get sane output? Yes.
 
   \item What are the main experimental results? Effectiveness/performance?
 
     Throughput for sentiment analysis is dominated by making a remote call.
-
     Throughput for POS tagging is dominated by making a python call (interpreted).
 
   \end{enumerate}
 
-  \section{Conclusion (1 page)}
+  \section{Conclusion}
   \begin{enumerate}\item What you have learnt through this project?
 
-    Morgan - learned how to parse html. write and use a webcrawler. CRF stuff. Database stuff.
+    Morgan - learned how to parse html, write and use a web crawler, 
+		We learned conditional random fields stuff and how to setup and use
+		the postgreql dbms.
+    It is a difficult task to get and clean data.
 
-    What are the difficulties you have encountered in terms of systems and algorithms in building the system to deliver the data products?
+		Christan - how to create complicated sql queries,
+		creating full text indices and how to
+		develop ajax calls to dynamic web site creation, and how to wrap almost 
+		anything in a posgres UDF. 
 
-    Morgan - Pain in the butt to get and clean data.
-
-    What kinds of Data Science tools/systems are needed?
-
-    Morgan -
-    Some type of generic universal web crawling interface would be nice.
-    Then a standard way to specify exactly which parts you want in a generic way.
-    As it is, there is a need to almost write the same parser/cleaner, for each datasource, and the datasources may change at any time.
+		Joir-dan -- Databases are fickle, text analytics are pretty sweet and have
+		a great upside.
 
 
   \end{enumerate}
-\end{enumerate}
 
-References
 
-MADlib http://madlib.net/
 
-twitter sentiment https://sites.google.com/site/twittersentimenthelp/
 
-IIT CRF http://crf.sourceforge.net/
+\bibliographystyle{abbrv}
+\bibliography{citation.bib}
+
+
+
+
 \end{document}
 
 %%% Local Variables:
