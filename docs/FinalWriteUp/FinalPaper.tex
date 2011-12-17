@@ -1,9 +1,10 @@
-\documentclass[11pt]{article}
+\documentclass[11pt,onecolumn]{article}
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{fullpage}
+\usepackage{listings}
 
 \usepackage{xspace}
 \usepackage{graphicx}
@@ -23,7 +24,8 @@
 
 \begin{figure}
   \begin{center}
-    \includegraphics[width=104mm]{logo.jpg}
+    %\includegraphics[width=104mm]{logo.jpg}
+    \includegraphics[width=40mm]{logo.jpg}
    %\includegraphics[width=4cm]{logo.jpg}
     \caption{Logo for overarching project.}
     \label{fig:logo}
@@ -40,16 +42,11 @@ in industry requires developers to connect multiple tools to build
 off-line batch processes to perform such analysis tasks. \system is
 an integrated system for ad hoc real-time query processing over
 structured and unstructured data. \system is built on top of MADlib,
-and PostgreSQL/Greenplum, and integrates in-database text extraction
-techniques from BayesStore. This demonstration uses two application
-domains---computation journalism and political campaign
-management---to show (1) real-time processing of ad hoc queries
-involving statistical text analysis; (2) joining between structured
-and textual data; and (3) query-time rendering of
-visualizations over the query result.
+and PostgreSQL, and integrates in-database text extraction
+techniques from BayesStore. 
+We developed a web site that demonstrates queries using different
+textual analytic tasks.
 \end{abstract}
-
-
 
 
   \section{Introduction}
@@ -61,46 +58,37 @@ visualizations over the query result.
 	He is most popular
   for the long-running series of video games that bear his name.
 
-  \begin{enumerate}
-  \item The problem statement and a summary of the main contributions and results of the project.
-
     There are large amounts of structured and unstructured data that is freely available,
 		we create a proof of concept system to show how to intermix the two.
     We use statistical text analysis techniques to extract structured information from unstructured 
 		data, and pass this on to later stages for further processing.
 
     We provide the ability to run queries over heterogeneous data such as structured statistical 
-		fact tables and unstructured natural language.
-
+		fact tables and unstructured natural language. All the techniques are 
+developed inside of the database and are executed using a SQL interface.
     Additionally, we  scrape dirty data and turn it into clean information, and then presenting 
 		the information in an easy to digest form.
-
     We want to create queries over sports data to gain insight of a player and/or teams
 		performance along with fan sentiment.
-
     We do however hope to be generic, and liberal in the data we take in, so that the same techniques can be applied to multiple domains.
-
     There is a web interface that provides pre-created web form queries that can be filled in 
-		like the Mad Libs game.
+		like the Mad Libs game \footnote{http://www.cise.ufl.edu/~cgrant/MADden}.
     It serves as a proving ground for various queries we test and run.
-		Additionally, we create visualization of the results in html and using charts.
+		Additionally, we create visualization of the results in html and using
+interactive web charts.
 
-  \item What is the responsibility of each member of the group?
 
-
+Each author contributed to the building \system.
    \textbf{Morgan} did consulting work among the various group members, and between groups.
     Official NFL team blogs. NFL stats from cbssports.com. He also led in the creation of the paper.
-		
-		\textbf{Christan} built the \system website -- including the Mad lib style interface and the 
+		\textbf{Christan} built the \system website including the Mad lib style interface and the 
 		result page with the charts and graphs. He obtained the tweet corpus, created the functionality
 		for entity resolution, information extraction, and sentiment analysis. He also helped Morgan
 		write the final paper.
-
 		\textbf{Joir-dan} Joir-dan obtained play-by-play data from ESPN.com, CBS sports, blogs,
 		and news recap articles.
 		He also came up with queries for the web site.
 
-  \end{enumerate}
 
   \section{Background}
   \subsection{Domain}
@@ -117,8 +105,6 @@ visualizations over the query result.
 
 
   \subsection{Background Information}
-
-
 
     Text analysis uses the state-of-the-art statistical machine learning (SML) methods to extract structured information,
     such as entities, relations, sentiments, topics, from text.
@@ -151,7 +137,7 @@ visualizations over the query result.
     using relations present in the data.
     This varies from simple relations between subjects,
     to recognizing specific entities within text.
-		For example, we may want to extract all the `organizations' mentioned in a 
+		For example, we may want to extract all the `organizations' mentioned in 
 		a news article.
 
 
@@ -189,8 +175,9 @@ In computational journalism, the panda project\footnote{http://blog.apps.chicago
 is a new effort to allows journalists to search and find relationship between 
 many news stories. However, their system does not provide the same type of 
 query interface.
-The Tweelq project was created at MIT and it allowed a query interface for 
-sentiment analysis over tweets. They created a parser for SQL and 
+The TweeQL project was created at MIT and it allowed a query interface for 
+sentiment analysis over tweets\cite{Marcus:2011:TDD:1989323.1989470}. 
+They developed an SQL like language for stream query preprocessing over the 
 sampled the live twitter stream.
 
 Daisy Wang \cite{wang2011hybrid} developed in-database techniques for 
@@ -198,9 +185,8 @@ conditional random fields. Our system aim to also have a completely in-database
 text analytics stack.
 
 
-  \section{System Description (4 pages)}
-  \subsection{System Architecture}
-  %What is the final system architecture?
+  \section{System Description }
+  \subsection{Architecture}
 
   {\system} is a four layered system, as can be seen in Figure \ref{fig:arch}.
   The user interface is where both naive and advanced users can construct queries over text, structured data, and models.
@@ -251,24 +237,23 @@ text analytics stack.
     which leads to misspellings and slang
     and the more  general case of people or companies having many names to refer to them.
 
-    An example of the informality of the slang \& misspellings in twitter is
+    An example of the informality of the slang and misspellings in twitter is
 		``tmrw'' for ``tomorrow'' and ``NY Jest'' vs ``NY Jets''. Sometime 
 		misspellings are intensional.
 
     An example of a person having multiple names is the
     nickname for Larry Fitzgerald which is ``Sticky Fingers''.
 		Companies may also have acronym and nickname
-    for example ``International Business Machines'' vs ``IBM'' and ``Big Blue''.
+    for example ``International Business Machines'' vs ``IBM'' vs ``Big Blue''
     and ``New York City'' vs ``Big Apple''.
 
     An example of multiple things with one name is
     Arizona Cardinals vs cardinals as a bird,
     Miami Dolphins vs dolphins as a fish and dolphins as a mammal.
 
-
-    This is implemented through q-grams for misspellings and alternate spellings,
+    This is implemented through qgrams for misspellings and alternate spellings,
     and an alias table for multiple names of an entity.
-    q-grams is the automatic approach that does fuzzy string matching,
+    qgrams is the automatic approach that does fuzzy string matching,
     with a threshold value that can be varied.
     The alias table being hand constructed.
 
@@ -277,13 +262,17 @@ text analytics stack.
     \label{qgram}
 
 		Qgrams also known as character ngrams is implemented inside of the database.
-		We can run a window function over strings for extract qgrams.
-		Comparing the created qgrams of strings gives use an approximate string
-		matching technique.
-		We are implement it in pure database so it works well with MPP systems.
-		Given a string \textcolor{blue}{Tim Tebow} we can create a 3-gram by 
-		using a sliding window.
-		
+		This technique as an approximate string match was first introduced in the 
+		SQouT project \cite{Jain:2009:BQO:1519103.1519108}.
+		To create qgrams over text in SQL we generate possible string and use the 
+	substring utilities to trim the correct gram.
+		We are implement it in purely in the database as a user defined function
+		 so it works well with MPP systems.
+		Given a string ``\textcolor{blue}{Tim Tebow}'' we can create a 3-gram by 
+		using a sliding window. We show the out put in figure \ref{tab:qgramoutput}.
+	
+		\begin{figure}	
+\begin{center}
 		\begin{tabular}{|l|l|}
 		\hline
 		\textbf{Position} & \textbf{3-gram} \\
@@ -311,14 +300,22 @@ text analytics stack.
 		$11$ & W\%\% \\
 		\hline
 		\end{tabular}
+\end{center}
+\caption{Qgrams creation for the term 'Tim Tebow'}
+\label{tab:qgramoutput}
+		\end{figure}
 
 Given two tables we can compare the overlap of two qgrams and compute a
-similarity. The we compute the similarity using the equation
-$$ S(table1,table2) = \frac{|table1 \cap table2|}{\min\{|table1|, |table2|\}}$$
+similarity. The we compute the similarity between $term_1$ and $term_2$
+using the equation
+$$ S(term_1,term_2) = 
+\frac{|term_1 \cap term_2|}{\min\{|term_1|, |term_2|\}} .$$
 
 Qgram approach may fail with small words with error in the center. An 
-example of this is displayed in the VOTKA vs VODKA example below.
+example of this is displayed in the VOTKA vs VODKA figure \ref{tab:vodka}.
 
+	\begin{figure}
+\begin{center}
     \begin{tabular}{|c|c|}
 		\hline
       \textbf{VOTKA} & \textbf{VODKA} \\ \hline
@@ -337,12 +334,18 @@ example of this is displayed in the VOTKA vs VODKA example below.
       {\color{blue}A\%\%} &  {\color{blue}A\%\%} \\
 		\hline
     \end{tabular}
+\end{center}
+\caption{An example of an unfortunate error situation in qgrams} 
+\label{tab:vodka}
+	\end{figure}
 
 In general the qgram approach is very approximate and loses accuracy with
 large documents.
 Run time for search is $O(|T|*|P|)$ where $|T|$ and $|P|$ is the text and
-search pattern.\footnote{For large documents preprocessing tricks are
-available}
+search pattern. We believe that creating indices over the document qgrams
+will help the run-time. 
+For large documents we can do hashing tricks to avoid super large 
+joins between data sets.  
 
 
     \subsubsection{Sentiment Analysis}
@@ -418,18 +421,14 @@ available}
 
   \subsection{Data Products}
 
-  We don't have particular products, so much as abilities to deliver varying products, and adapt to the data as it changes.
-
-
 	We created a set of tools to query over data and extract knowledge.
 	We created a website to interface with the database and visualize results.
-
 
 	We developed 5  Mad Lib style queries including;
 	\begin{enumerate}
 	\item Give me [number] [+/-/o] sentiment comments about [Player].
 	\item Compare [Player1][Player2] by the twitter sentiment	over dates from
-	[date one] and [data two] and return [number] results.
+	[from] and [to] and return [number] results.
 	\item Give me the [+/-/o] sentiment for the top [number] 
 	[running back/quarter back/ wide receiver] for tweets.
 	\item Return all the named entity tags from the text [text].
@@ -437,6 +436,76 @@ available}
 	one of the top [number]  [running back/quarter back/ wide receiver].
 	\end{enumerate}
 
+	Each of these queries map directly to SQL queries that we run on our system.
+The queries are:
+	\begin{enumerate}
+	\item 
+{\small
+\begin{verbatim}
+SELECT cgrant_sentiment(twtext) as sent, twtext, twuser_id_str, id_str
+FROM tweets
+WHERE (cgrant_distance(1,[player],2, twtext, 5) > .5)
+AND cgrant_sentiment(twtext) = [+/-/o]
+GROUP BY sent, text
+LIMIT [number];	
+\end{verbatim}
+}
+	\item
+{\small
+\begin{verbatim}
+SELECT (CASE WHEN 
+(cgrant_distance(1,[Player1],2, twtext, 5) > .5) THEN '[Player1]'
+ELSE '[Player2]' END), created_at, cgrant_sentiment(twtext), twtext
+FROM tweets
+WHERE created_at between [from] and [to]
+AND ((cgrant_distance(1,[Player1],2, twtext, 5) > .5) OR ".
+(cgrant_distance(1,[Player2],2, twtext, 5) > .5)) LIMIT [num];
+\end{verbatim}
+}
+
+	\item
+{\small
+\begin{verbatim}
+SELECT id, fname, lname, yards, tds, doc, sentiment FROM
+(SELECT id, fname, lname, yards, tds, doc, cgrant_sentiment(doc) AS sentiment
+FROM
+(SELECT rb.pid as id, rb.first as fname, rb.last as lname, n.twtext as doc, 
+rb.total_yards as yards, rb.touchdowns as tds 
+FROM tweets n, 
+(SELECT pid, first, last, total_yards, touchdowns, first || ' ' || last as tsv
+FROM [running back/quarter back/wide receiver table] 
+ORDER BY total_yards DESC, touchdowns DESC
+LIMIT [number]) as rb 
+WHERE cgrant_distance(1, rb.tsv, 2, n.twtext, 5) > .5) as docs) as sent 
+WHERE sentiment = [+/-/o]
+LIMIT [number];
+
+\end{verbatim}
+}
+	\item
+{\small
+\begin{verbatim}
+SELECT termnum, term
+FROM cgrant_ne_chunk('[comments]', true)
+WHERE tag = 'NE' ;
+\end{verbatim}
+}
+	\item
+{\small
+\begin{verbatim}
+SELECT topKplayers.full_name, twtext, cgrant_sentiment(twtext) 
+FROM tweets, (SELECT first || ' ' || last as full_name, total_yards, touchdowns
+FROM [running back/quarter back/wide receiver table] 
+ORDER BY total_yards DESC, touchdowns DESC 
+LIMIT [K]) as topKplayers 
+WHERE cgrant_distance(1, topKplayers.full_name, 2, twtext, 5) > .5 
+LIMIT [number];
+\end{verbatim}
+}
+	\end{enumerate}
+
+	
+	In addition, we have seven queries that are made possible in the \system system. They are listed in the appendix section \ref{sec:extraqueries}.
 
   \begin{figure}
     \begin{center}
@@ -446,63 +515,145 @@ available}
     \end{center}
   \end{figure}
 
-  \section{Experiments (2 pages)}
-  \begin{enumerate}
-    \item Data
+  \section{Experiments}
 
-		Twitter -- unstructured, microblogs, very small document size (140 characters). This was gathered using the twitter trickle. With domain related terms, like NFL, Tim Tebow, Jets.
-    Approximately 9GB of tweets, yielding a 7GB inverted index.
+		We obtained data from several different data sources.
+		We obtained over 20,916,048 tweets from the Twitter API.
+Each tweet has a maximum of 140 characters as well as other metadata.
+We obtained the data by searching football related terms on the tweet stream.
+The tweets were collected during NFL game days from August 18th to
+November 29th. The data amounted to 
+approximately 9GB of tweets, yielding a 7GB inverted index.
 
-    Blogs -- english language, small-medium document size, 10-100 sentences.
-    30k+ from official NFL teams, going back several years.
-    60k+ from ESPN as commentary going back several years.
-
-    Play-by-plays -- semi-structured, repeated patterns with specific meaning.
-
-	\item Measure of success
-
-		We were able to create queries that gave interesting results.
-		We consider this work a success.
-
-
-  \item What are the main experimental results? Effectiveness/performance?
+We obtained blogs from 20 of the 32 teams. The blogs were all english
+language and documents are each between 10-100 sentences.
+There are over 33 thosand unique articles at 186 MB. 
+We also have information from ESPN, CBSSports, and NFL.com. This data includes
+60,680 news and opinion articles and play-by-play information from 530 games.
+The play-by-play data has repeated patterns with specific meaning.
 
     Throughput for sentiment analysis is dominated by making a remote call.
-    Throughput for POS tagging is dominated by making a python call (interpreted).
+    Throughput for POS tagging is dominated by making a python call and 
+loading the NLTK into memory (interpreted).
+The queries involving tweets take along time to complete because of the shear
+size of the tweet tables.
 
-  \end{enumerate}
 
   \section{Conclusion}
-  \begin{enumerate}\item What you have learnt through this project?
+We developed \system, a system that allowed anyone do perform advanced
+queries over structured and unstructured text.
+We included data over several different types in the NFL domain.
 
-    Morgan - learned how to parse html, write and use a web crawler, 
-		We learned conditional random fields stuff and how to setup and use
-		the postgreql dbms.
-    It is a difficult task to get and clean data.
-
-		Christan - how to create complicated sql queries,
-		creating full text indices and how to
-		develop ajax calls to dynamic web site creation, and how to wrap almost 
+    Each member of the team had a unique experience taking the large scale
+data science class and developing \system.
+		Morgan learned how to parse html, write and use a web crawler, 
+		He learned about conditional random fields stuff and how to setup and use
+		the Postgresql DBMS. He also experienced that it is a difficult task to
+		obtain and clean data.
+		Christan learned how to create complicated sql queries. 
+He also learned to develop AJAX calls for dynamic Web 2.0 style 
+web site creation.
+Additionally, he learned how to wrap almost 
 		anything in a posgres UDF. 
+		Joir-dan learned that Databases are fickle, text analytics are pretty sweet and have a great upside.
 
-		Joir-dan -- Databases are fickle, text analytics are pretty sweet and have
-		a great upside.
-
-
-  \end{enumerate}
-
-
-
+As future work we will run the queries on a massively parallel processing 
+database offered by Greenplum\footnote{http://www.greenplum.com}.
+In addition we plan to expand the website
+to allow users to create account and develop their own Mad Lib style 
+queries as well as visualizations.
+The information extraction and sentiment analysis is not yet in the database
+we plan to develop in database techniques to facilitate scale.
 
 \bibliographystyle{abbrv}
 \bibliography{citation.bib}
 
+\appendix
+
+\section{Extra Queries}
+\label{sec:extraqueries}
+Here is a list of extra queries and an explanation developed for \system.
+The first query is an example of a search using an inverted index.
+\begin{verbatim}
+-- We want to find 10 queries that contain the Running Back 
+-- 'Maurice Jones-Drew' (exact match only)
+SELECT twtext FROM tweets
+WHERE twtextvector @@ to_tsquery('Maurice & Jones-Drew')
+LIMIT 10;
+\end{verbatim}
+
+
+This query is an example of entity resolution using qgrams and approximate 
+string matching. This shows up inside of the ``cgrant\_distance'' function.
+\begin{verbatim}
+-- We want to find 10 queries that contain the Running Back 
+-- 'Maurice Jones-Drew' (allow distance of at least .5 (resoluting) )
+SELECT twtext 
+FROM tweets
+WHERE cgrant_distance(1, 'Maurice Jones-Drew', 2, twtext, 4) > .5
+LIMIT 10;
+\end{verbatim}
+
+
+This query is an example of using the sentiment analysis function.
+\begin{verbatim}
+-- Give me the sentiment for the first 100 tweets we have
+SELECT cgrant_sentiment(twtext)
+FROM tweets
+LIMIT 100;
+\end{verbatim}
+
+
+This query uses both entity resolution in a more complicated query.
+\begin{verbatim}
+-- Give me the first 100 tweets containing one of the top ten 
+-- Quarterbacks in passing yards (we need to extract names, and then 
+-- resolute the names in the tweet)
+SELECT topKplayers.full_name, twtext FROM tweets, 
+	(SELECT first || ` ' || last as full_name, total_yards, touchdowns
+              FROM passingstats
+              ORDER BY total_yards DESC, touchdowns DESC
+              LIMIT 10) as topKplayers
+WHERE cgrant_distance(1, topKplayers.full_name, 2, twtext, 5) > .5
+LIMIT 100;
+\end{verbatim}
+
+
+This query mixes information extraction, using the inverted index as well
+as sentiment analysis through the user defined function.
+\begin{verbatim}
+-- Give me the first 20 tweets containing the Quarterback 'David Garrard' 
+-- that is not a retweet, and give me the sentiment for each tweet
+SELECT twtext, cgrant_sentiment(twtext)
+FROM tweets
+WHERE twtextvector @@ to_tsquery(`David & Garrard & !RT')
+LIMIT 20;
+\end{verbatim}
+
+This query uses both information extraction and entity resolution.
+\begin{verbatim}
+-- Give me the tweets and sentiment of the first 20 tweets that contain the 
+-- Quarterback `Tim Tebow'  (resoluted name)
+SELECT twtext, cgrant_sentiment(twtext)
+FROM tweets
+WHERE cgrant_distance(1, `Tim Tebow', 2, twtext, 5) > .6
+LIMIT 20;
+\end{verbatim}
+
+This query uses information extraction, entity resolution
+and sentiment analysis.
+\begin{verbatim}
+-- Information Extraction with Entity Resolution with Sentiment Analysis
+-- Give me the tweets and sentiment for the first 20 tweets that contain 
+-- the Quarterback `Tim Tebow' (Resoluted) and contains the `#Jaguars' hashtag
+SELECT twtext, cgrant_sentiment(twtext)
+FROM tweets
+WHERE cgrant_distance(1, `Tim Tebow', 2, twtext, 5) > .6 
+AND twtextvector @@ to_tsquery(`#Jaguars')
+LIMIT 20;
+\end{verbatim}
 
 
 
 \end{document}
 
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: t
-%%% End:
