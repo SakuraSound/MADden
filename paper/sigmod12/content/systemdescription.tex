@@ -17,7 +17,7 @@ the {\system} system.
 The user interface is where both naive and advanced users can construct queries over
 text, structured data, and models. From the user interface, queries are then passed to the
 DBMS, where MADLib and {\system} libraries sit on top of the query processor to
-add statstical and text processing functionality. These queries are 
+add statistical and text processing functionality. These queries are 
 processed using PostgreSQL/Greenplum's Parallel DB architecture to further
 optimize on replicated storage. 
 
@@ -65,20 +65,52 @@ particular sentence. For the current implementation of {\system}, we are
 utilizing existing packages, such as those found in the Natural Language 
 Toolkit (NLTK~\footnote{http://www.nltk.org/}).
 
-\subsection{In-Database Statistical Methods}
-To enable text analytics within the database, {\system} utilizes statistical
-functions found in the MADlib library \cite{Cohen:2009:MSN:1687553.1687576}.
-MADlib provides a backbone for the text analytics functionality, including
-Naive Bayes, LDA \cite{Blei:2003:LDA:944919.944937}, and Sparse Vector
-functions. MADLib also employs CRF inference, using Viterbi and
-MCMC methods that can be used for information extraction 
-\cite{wang2011hybrid}. The CRF inference methods, like the others methods, are
-all created in native SQL.
-
-
+%\subsection{In-Database Statistical Methods}
 \subsection{{\system} Implementation}
-The implementation of {\system} utilizes these key features to process 
-text analysis queries.\\
+
+% TODO develop this section more!!
+
+\system algorithms are developed to perform optimally for the data format.
+The algorithms are first implemented in SQL or PL/pgSQL, as a script and 
+exposes the execution pipeline to the query optimizer. 
+Hybrid query optimization techniques to achieve query speed up is discussed in
+our previous work \cite{wang2011hybrid}.
+SQL excels in batch relation and group operations, we use Python language
+scripts as a glue language to manage to execution of several complicated 
+queries and to control the data flow especially loops.
+
+% MADlib provides a backbone for the text analytics functionality, including
+% Naive Bayes, LDA \cite{Blei:2003:LDA:944919.944937}, and Sparse Vector
+% functions. MADLib also employs CRF inference, using Viterbi and
+%MCMC methods that can be used for information extraction 
+%\cite{wang2011hybrid}. The CRF inference methods, like the others methods, are
+%all implemented in native SQL.
+
+To enable text analytics, {\system} works alongside statistical
+functions found in the MADlib library \cite{Cohen:2009:MSN:1687553.1687576}.
+
+Dense array and matrix operations are efficiently performed 
+through calls to highly tuned numeric packages such as LAPACK.
+
+%\subsection{{\system} Implementation}
+%The implementation of {\system} utilizes these key features to process 
+%text analysis queries.\\
+%We discuss the 
+
+\noindent
+\textbf{Data Parallelism}\\
+With the ability to implement a parallel database architecture with Postgres or 
+Greenplum, we can utilize data parallelism to further optimize queries written
+written with {\system}. Each node within the parallel DB could run some query
+over a subset of the data (data parallel). This includes the statistical methods
+in MADLib, which were all built to be data parallel.
+
+\noindent
+\textbf{Query Processing and Optimization} \\
+Since the text analytics are being done as part of our SQL query, and because
+these methods are implemented in SQL, they are subject to the same optimizations
+that normal SQL queries would. \\
+
 
 \noindent
 \textbf{Indices}\\
@@ -100,18 +132,5 @@ statistics with other tables, or other text analysis views, to construct more
 interesting results. This, combined with expressing text analysis functionality
 within a SQL query, allows for more complex queries to be realized. \\
 
-\noindent
-\textbf{Query Processing and Optimization} \\
-Since the text analytics are being done as part of our SQL query, and because
-these methods are implemented in SQL, they are subject to the same optimizations
-that normal SQL queries would. \\
-
-\noindent
-\textbf{Data Parallelism}\\
-With the ability to implement a parallel database architecture with Postgres or 
-Greenplum, we can utilize data parallelism to further optimize queries written
-written with {\system}. Each node within the parallel DB could run some query
-over a subset of the data (data parallel). This includes the statistical methods
-in MADLib, which were all built to be data parallel.
 
 
