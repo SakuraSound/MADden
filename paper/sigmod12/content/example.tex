@@ -80,7 +80,7 @@ home and away team for each NFL game played.\\
 In addition to the table, we have several UDFs that perform several statistical
 text analysis tasks. The {\tt match} function takes two strings and
 uses alias tables to perform a fuzzy match.
-Additionally, {\tt extract\_entities} is a materilized view that is the
+Additionally, {\tt extract\_entities} is a materialized view that is the
 result of the information extraction process in the vein of previous work
 \cite{wang2010probabilistic}.
 It returns tuples with the schema
@@ -147,7 +147,7 @@ between structured and text based data.
 This query counts the number of times each entity is mentioned in either tweets
 or blogs. This query performs an aggregate over a fuzzy entity resolution
 task across multiple media. The result of this query could be the input to a
-word cloud or a histogramm for fast visual analysis.
+word cloud or a histogram for fast visual analysis.
 %\lstset{tabsize=2}
 %\lstset{breaklines=true}
 %\lstset{basicstyle=\small}
@@ -174,7 +174,7 @@ sentiment towards a team vs. their performance at home.
 %\begin{lstlisting}
 \begin{small}
 \begin{alltt}
-\textit{Q3: [Structured and Unstructre Data]}
+\textit{Q3: [Structured and Unstructured Data]}
 SELECT ts.pid, ts.date, g.hscore / g.ascore AS perf,
   SUM(sentiment(c.entry))
 FROM Team t, TeamStats ts, NFLCorpus c, GameStats g
