@@ -1,0 +1,38 @@
+\section{Text Analysis Queries and Demonstration}
+Suppose a sports journalist wants to do an investigative
+piece on overall public opinion of the Jacksonville Jaguars
+for the 2011-2012 season.
+\jag{Do we still need to use az as an example now that we are submitting to
+vldb??}
+Such a peice requires an in-depth analysis of news reports, fan tweets, and 
+football (NFL) blogs. And suppose we would also like to correlate the team's
+performance to the public opinion. Such a query currently would require
+the combination of multiple tools, and \textit{code glue} to solve the problem.
+However with the MADden system, these queries require much less effort with SQL.
+Consider the simple query \textbf{Give me the positive sentiment involving the
+Jacksonville Jaguars and 'Maurice Jones-Drew.'} With MADden, a query like
+this be expressed as in Query 1. Such a simple query shows the power of a 
+system like MADden. As with any SQL query, we have the ability to build much 
+more complex queries through the use of smaller, simpler queries.
+
+%\lstset{breaklines=true}
+%\lstset{tabsize=2}
+%\lstset{basicstyle=\small}
+%\begin{lstlisting}{language=SQL}
+\begin{small}
+\begin{alltt}
+\textit{Q1: [Ranked Document Lists]}
+SELECT e.freq, c.docid,  e.entry
+FROM NFLCorpus c
+    (SELECT docid, count(*) AS freq
+    FROM extract_entities
+    WHERE match('Jacksonville Jaguars', entity)) AS e
+WHERE sentiment(entry) = '+',
+AND match('Maurice Jones-Drew', entity)
+ORDER BY e.freq
+\end{alltt}
+\end{small}
+\label{}
+%\end{lstlisting}
+\jag{Why exactly does the match function have an entity flag attached to it??}
+\jag{Maybe a contains method as well }
