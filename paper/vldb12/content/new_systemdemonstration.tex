@@ -1,16 +1,13 @@
 \section{Text Analysis Queries and Demonstration}
 Suppose a sports journalist wants to do an investigative
 piece on overall public opinion of the Jacksonville Jaguars
-for the 2011-2012 season.
-\jag{Do we still need to use az as an example now that we are submitting to
-vldb??}
-Such a peice requires an in-depth analysis of news reports, fan tweets, and 
-football (NFL) blogs. And suppose we would also like to correlate the team's
-performance to the public opinion. Such a query currently would require
-the combination of multiple tools, and \textit{code glue} to solve the problem.
-However with the MADden system, these queries require much less effort with SQL.
-Consider the simple query \textbf{Give me the positive sentiment involving the
-Jacksonville Jaguars and 'Maurice Jones-Drew} (Query 1).' 
+for the 2011-2012 season. Such a peice requires an in-depth analysis of news
+reports, fan tweets, and football (NFL) blogs. And suppose we would also like 
+to correlate the team's performance to the public opinion. Such a query
+currently would require the combination of multiple tools, and \textit{code glue}
+to solve the problem. However with the MADden system, these queries require much
+less effort with SQL. Consider the simple query \textbf{Give me the positive
+sentiment involving the Jacksonville Jaguars and 'Maurice Jones-Drew} (Query 1).' 
 
 %\lstset{breaklines=true}
 %\lstset{tabsize=2}
@@ -18,7 +15,7 @@ Jacksonville Jaguars and 'Maurice Jones-Drew} (Query 1).'
 %\begin{lstlisting}{language=SQL}
 \begin{small}
 \begin{alltt}
-\textit{Q1: [Ranked Document Lists]}
+\textit{Q1: Sentiment and ER example }
 SELECT e.freq, c.docid,  e.entry
 FROM NFLCorpus c
     (SELECT docid, count(*) AS freq
@@ -32,7 +29,12 @@ ORDER BY e.freq
 \label{}
 %\end{lstlisting}
 \jag{Why exactly does the match function have an entity flag attached to it??}
-\jag{Maybe a contains method as well }
+\jag{Maybe a contains method as well . and this query just needs to be cleaned
+up}
+
+In this query, we have entity resolution (match function), and sentiment
+analysis (sentiment function), acting on a series of data tables NFLCorpus and
+ExtractEntities \jag{(name needs to change)}
 
 MADden's text analytics package is built alongside MADlib, through the use of
 user defined functions (UDFs). As with the existing MADlib toolkit, MADden's 
@@ -41,5 +43,56 @@ rather than attempting to fit the data to a particular function or package.
 This becomes increasingly advantageous, as in many fields, such as sports
 journalism, investigative pieces are a combination of textual analysis and
 statistical insight. Combining both tasks is done in the same fashion as
-using subqueries in SQL.
+using subqueries in SQL. Now supposing that our sports journalist wants
+to obtain positive articles from the top 5 rushers of the 2012 NFL season,
+they can do so as follows:
+
+\jag{PLACE THIS QUERY HERE. . .}
+
+%\lstset{tabsize=2}
+%\lstset{breaklines=true}
+%\lstset{basicstyle=\small}
+%\begin{lstlisting}
+\begin{small}
+\begin{alltt}
+\textit{Q3: [Structured and Unstructured Data]}
+SELECT ts.pid, ts.date, g.hscore / g.ascore AS perf,
+  SUM(sentiment(c.entry))
+FROM Team t, TeamStats ts, NFLCorpus c, GameStats g
+WHERE c.type = 'tweet' AND t.name = 'Cardinals' 
+  AND t.id = g.hid AND gs.game_date = c.posted_at 
+  AND match(t.name,c.entry) IS true
+GROUP BY ts.pid, ts.date, g.hscore, g.ascore
+ORDER BY gs.game_date
+\end{alltt}
+\end{small}
+%\end{lstlisting}
+
+\jag{THis query is not representative of the one discussed\ldots just
+placeholder.}
+
+During the conference, we plan to give an interactive demonstration of the 
+{\system}'s capabilities.
+We built a user interface to allow the user to interact with \system. 
+We will allow the user to use tables from our NFL data set or political data
+for campaign management queries.
+
+Our demonstration will illustrate the following points: 
+\begin{enumerate}
+  \item The ability to perform statistical text analytics inside the DBMS
+  \item Query driven computation of analytics
+  \item The flexibility of our data sources by using structured data and text
+  \item Query execution over large amounts of text in real-time
+  \item Ability to perform textual analytics across multiple domains
+\end{enumerate} 
+
+For the demonstration, a web interface will be provided to interact with our
+system. It will utilize both a raw SQL UI, as well as a Mad
+Lib\footnote{http://en.wikipedia.org/wiki/Mad\_Libs} style interface. The raw
+SQL interface will allow users to type in their own SQL queries to interact with
+the datasets, while the Mad Libs interface will allow users to customize query
+templates through drop-down lists and text box completions.
+
+Regardless of the interaction type, results from the queries will be presented 
+to the user through a vareity of visualizations
 
