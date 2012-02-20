@@ -1,0 +1,45 @@
+
+\section{{\system } vs Industry Techniques}
+
+
+To answer this question, one needs to find all the news articles where the
+NFL team is mention and the player is mentioned.
+We need to perform an entity resolution step -- our dataset may contain many
+articles about teams from Arizona and Teams with a mascot as a Cardinal.
+Next, we compute the
+aggregate sentiment for the document. We can then rank the documents with
+respect to the aggregate score.
+Notice the question is not concerning news about the player individually
+but the document as a whole. No time smoothing is required for
+for accurate answers.
+
+To answer a query as described above, a developer may use the combination of
+a text search engine such as Lucene with an analytic toolkit such as
+MATLAB or R. A developer would first create indexes for the data in Lucene for
+the possible documents that contain the team, player and their associated
+aliases. After the documents are retrieved a developer can use an off the
+shelf algorithm to calculate the sentiment, then they can sort and rank each
+document.
+Any change in the dataset may necessitate a change in the index and
+the algorithm.
+Tools such as Hadoop MapReduce would have a similar batch processing
+work flow.
+
+Using {\system} we are able to perform a declarative query over the data set
+to return the set of correct documents. Using native SQL statements, we get
+a query optimizer that allows us to perform each step of the query with
+out iteratively waiting to load all documents. Another benefit of {\system} is
+we bring the query to the data, there is no needed to make large copies
+spend time
+transferring portions of the data around. For large data sets, the data becomes
+unwieldy for in memory implementations. Using {\system}, the system and any
+algorithms scale with the data.
+A user does not have to rely on samples, as commonly done using analytic tools.
+We provide a framework for data analyst to ingest and analyze the information
+on the fly. The system that hold the data is the same system that is queries.
+To support adhoc textual analysis over large data sets a query-driven
+approach is necessary for real-time exploration. During
+the computation we can use the information given in the query to reduce
+total computation.
+
+\ceg{Emphasize the benefits of the query interface and out model. Make the advantages more clear}

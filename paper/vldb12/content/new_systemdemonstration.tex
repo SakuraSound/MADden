@@ -10,10 +10,7 @@ performance to the public opinion. Such a query currently would require
 the combination of multiple tools, and \textit{code glue} to solve the problem.
 However with the MADden system, these queries require much less effort with SQL.
 Consider the simple query \textbf{Give me the positive sentiment involving the
-Jacksonville Jaguars and 'Maurice Jones-Drew.'} With MADden, a query like
-this be expressed as in Query 1. Such a simple query shows the power of a 
-system like MADden. As with any SQL query, we have the ability to build much 
-more complex queries through the use of smaller, simpler queries.
+Jacksonville Jaguars and 'Maurice Jones-Drew} (Query 1).' 
 
 %\lstset{breaklines=true}
 %\lstset{tabsize=2}
@@ -36,3 +33,13 @@ ORDER BY e.freq
 %\end{lstlisting}
 \jag{Why exactly does the match function have an entity flag attached to it??}
 \jag{Maybe a contains method as well }
+
+MADden's text analytics package is built alongside MADlib, through the use of
+user defined functions (UDFs). As with the existing MADlib toolkit, MADden's 
+declarative nature, allows the user to push queries through their datasets,
+rather than attempting to fit the data to a particular function or package.
+This becomes increasingly advantageous, as in many fields, such as sports
+journalism, investigative pieces are a combination of textual analysis and
+statistical insight. Combining both tasks is done in the same fashion as
+using subqueries in SQL.
+
