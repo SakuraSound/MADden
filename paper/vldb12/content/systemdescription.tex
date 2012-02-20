@@ -1,0 +1,104 @@
+
+\section{System Description}
+
+We discuss the architecture, functionalities, and the implementation of
+the {\system} system.
+\begin{figure}
+   \begin{center}
+        \includegraphics[scale=0.2]{content/graphics/arch.png}
+        \caption{{\system} architecture}
+        \label{fig:arch}
+   \end{center}
+\end{figure}
+    
+\subsection{System Architecture}
+
+{\system} is a four layered system, as can be seen in Figure \ref{fig:arch}.
+The user interface is where both naive and advanced users can construct queries over
+text, structured data, and models. From the user interface, queries are then passed to the
+DBMS, where both MADLib and {\system} libraries sit on top of the query processor to
+add statistical and text processing functionality. 
+It is important to emphasize that MADlib and {\system} perform functions
+at the same logical layer.  These queries are processed using 
+PostgreSQL and Greenplum's Parallel DB architecture to further optimize on 
+replicated storage. 
+
+
+\subsection{{\system} Implementation}
+
+In this section we discuss the \system implementation. We talk about the 
+architecture decisions and give examples of algorithms where we see the
+benefits of design decisions.
+
+
+\system algorithms are developed to take advantage of the architecture and 
+features of the DBMS.
+The algorithms are first implemented in SQL or PL/pgSQL, as this language
+exposes the execution pipeline to the query optimizer. 
+SQL excels in first-order logic operations performed in batch.
+If many loops and complicated data flows are involved, we use the PL/Python 
+scripting language to control the execution.
+Dense or sparse array and matrix data structures can be represented
+by specialized types. Operations on these structures can be performed in
+SQL or calculated with calls to highly tuned numeric packages such as LAPACK.
+During development of algorithms in MADden or MADLib we take these options 
+into consideration.
+Many approaches exist for in-database information extraction. 
+We build on our previous work using Conditional Random Fields (CRFs) for 
+query-time information extraction \cite{wang2011hybrid}. 
+We use an hybrid approach to information extraction where we perform the 
+extraction and the inference inside of the database. [[The query optimizer and
+our code aids in algorithmic decisions during the inforamtion extraction 
+process]].
+
+To enable text analytics, {\system} works alongside statistical
+functions found in the MADlib library \cite{Cohen:2009:MSN:1687553.1687576}.
+
+With the ability to implement a parallel database architecture with %Postgres or 
+Greenplum, we can utilize data parallelism to further optimize queries written
+with {\system}. Each node within the parallel DB could run some query
+over a subset of the data (data parallel). This includes the statistical methods
+in MADLib, which were all built to be data parallel.
+
+In part-of-speech (POS) tagging of a corpra is an integral task for many 
+textual analytic operations. POS tagging can be performed per-paragraph or 
+per-sentence meaning the process is easily parallelizeable in our queries.
+
+With POS tagging performed we can perform the similarly parallel operation 
+of sentiment analysis.
+Sentiment analysis deals with the study of opinions expressed within text. 
+The sentiment is usually expressed in terms of polarities, where positive
+sentiment refers to the positive nature of the expressed opinion, and negative
+nature for negative sentiment. Much work has already been done in this
+area for document-level and entity-level sentiment \cite{o2010tweets,
+zhang2011combining}. 
+{\system} can apply document and sentence level sentiment analysis.
+[[We want to perform it in native SQL... can we do this??]]
+
+Each text analysis function creates a view that can continue to be utilized.
+Since views can be utilized in the same manner as tables, we can join calculated
+statistics with other tables, or other text analysis views, to construct more
+interesting results. This, combined with expressing text analysis functionality
+within a SQL query, allows for more complex queries to be realized. \\
+
+
+In {\system} we encounter situations requiring entity resolution problem.
+Entity resolution or co-reference resolution is the problem where given any two
+mentions of a name, the are clustered only if they refer to the same real 
+world entity. This problem is difficult because you can have mentions that are
+spelled the same but refer to different entities and conversely we different
+spelling that may refer to the same entity.
+Certain entities may be misrepresented by the presence of different names, 
+misspellings in the text, or aliases. It is important to
+resolve these entities appropriately to better understand the data. Increasingly
+informal text, like blog posts and tweets requires entity resolution. 
+{\system} utilizes inverted indices within the database to perform text
+analysis on documents. We can scan the inverted index of each 
+document, filtering out documents that do not contain instances of the player names.
+To handle misspellings and nicknames we use trigram indices to perform 
+approximate matches of searches for names \cite{Jain:2009:BQO:1519103.1519108}.
+.
+[[Here should we talk about collective entity resolution??]]
+
+
+
