@@ -2,17 +2,18 @@
 \begin{abstract}
 
 In many domains, structured data and unstructured text are
-both important natural resources to fuel data analysis. Statistical
+important natural resources to fuel data analysis. Statistical
 text analysis needs to be performed over the text data to extract
-structured information for further query processing. Common practice
-in industry requires developers to connect multiple tools to build
-off-line batch processes to perform such analysis tasks. \system is
+structured information for further query processing. Typically, developers
+will connect multiple tools to build
+off-line batch processes to perform analysis tasks. \system is
 an integrated system for ad hoc real-time query processing over
-structured and unstructured data. \system is built on top of MADlib,
-and PostgreSQL/Greenplum, and integrates in-database text extraction
-techniques from BayesStore. This demonstration uses two application
-domains---computation journalism and political campaign
-management---to show (1) real-time processing of ad hoc queries
+structured and unstructured data. \system is built along side of MADlib,
+over PostgreSQL and Greenplum DBMS. \system includes a library of 
+textual analytic functions and it integrates in-database text 
+extraction techniques from BayesStore. To illustrate our system, this 
+demonstration uses two application domains---computation journalism 
+and political campaign management---to show (1) real-time processing of ad hoc queries
 involving statistical text analysis; (2) joining between structured
 and textual data; and (3) query-time rendering of
 visualizations over the query result.
