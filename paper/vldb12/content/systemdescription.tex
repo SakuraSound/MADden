@@ -72,15 +72,8 @@ sentiment refers to the positive nature of the expressed opinion, and negative
 nature for negative sentiment. Much work has already been done in this
 area for document-level and entity-level sentiment \cite{o2010tweets,
 zhang2011combining}. 
-{\system} can apply document and sentence level sentiment analysis.
+{\system} can apply sentiment analysis at document and sentence level.
 [[We want to perform it in native SQL... can we do this??]]
-
-Each text analysis function creates a view that can continue to be utilized.
-Since views can be utilized in the same manner as tables, we can join calculated
-statistics with other tables, or other text analysis views, to construct more
-interesting results. This, combined with expressing text analysis functionality
-within a SQL query, allows for more complex queries to be realized. \\
-
 
 In {\system} we encounter situations requiring entity resolution problem.
 Entity resolution or co-reference resolution is the problem where given any two
@@ -99,6 +92,13 @@ To handle misspellings and nicknames we use trigram indices to perform
 approximate matches of searches for names \cite{Jain:2009:BQO:1519103.1519108}.
 .
 [[Here should we talk about collective entity resolution??]]
+
+
+Each text analysis function creates a view that can continue to be utilized.
+Since views can be queries in the same manner as tables, we can join calculated
+statistics with other tables, or other text analysis views, to construct more
+interesting results. This, combined with expressing text analysis functionality
+within a SQL query, allows for more complex queries to be realized. \\
 
 
 
