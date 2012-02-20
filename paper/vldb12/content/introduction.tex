@@ -20,8 +20,8 @@ information, such as entities, relations, sentiments, topics, from
 text. The result of the text analysis can be joined with other
 structured data sources to perform analysis. For example, the sports
 journalist may want to join the sentiment result from tweets and the
-scores of the Arizona Cardinals\footnote{http://www.azcardinals.com} 
-(NFL Team) to see their correlations.
+scores of an NFL team named the Arizona Cardinals\footnote{http://www.azcardinals.com} 
+to see their correlations.
 
 To our knowledge, there is no integrated system with a query
 interface that enables domain experts (e.g., journalists) to issues
@@ -54,8 +54,8 @@ imported into a database to be joined with the score statistics.}
 
 In this demonstration paper, we describe \system, an integrated
 system that supports both relational query processing and
-statistical analysis over text. \system is implemented on top of MADLib,
-which is collection of libraries developed on 
+statistical analysis over text. \system is implemented alongside MADLib,
+a collection of libraries developed on 
 top of PostgreSQL/Greenplum. MADLib supports
 in-database statistical methods, and in particular, the work on in-database text extraction
  from BayesStore~\cite{Wang:2008:BML:1453856.1453896} is being integrated into
@@ -73,10 +73,10 @@ text analysis over textual data involving different models.
 To support this over large data we need parallel algos. }
 
 \system supports a declarative query interface and real-time query
-processing, which is needed for ad hoc analysis. SQL-like queries
+processing that is needed for ad hoc analysis. SQL-like queries
 and ER (Entity-Relationship) models are used as a higher-level of
 abstraction of the SML models and inference methods for text
-analysis. ad hoc query-driven text analysis enable exploratory
+analysis. Ad hoc query-driven text analysis enable exploratory
 queries and query refinement based on the results. Users of such
 query interfaces do not have to know the underlying statistical
 machine learning models or the various text analysis tasks being
@@ -110,7 +110,7 @@ implementation is over PostgreSQL and Greenplum parallel databases,
 demonstrating the scalability of our system.}
 
 In the demonstration of \system, we will show the 
-following points in two application domains, including the NFL
+following points in two application domains, namely the NFL
 and the presidential election.
 \begin{itemize}
 \item Real-time processing of ad hoc queries 
