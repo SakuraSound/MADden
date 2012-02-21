@@ -1,4 +1,91 @@
 \section{Text Analysis Queries and Demonstration}
+[Key points to think about]
+[How to present this as easy to use?]
+[How to carry the sports journalism story throughout]
+
+Based on our example dataset, suppose a sports journalist
+wants to do an investigative piece on overall public opinion 
+of all the Florida NFL teams during the 2011-2012 season. 
+Such a peice would require in-depth analysis of news reports,
+tweets, blog postings, among other sources. On the text
+analytics side of this problem, the standard approach would
+consist of trawling through the text sources either by hand
+with help, or utilizing a series of different text processing
+toolkits and packages, sometimes specialized for a singular 
+task. MADden can streamline this process, with its declarative,
+in-database approach to text analytics. A first step could 
+conceivably consist of paring your corpora down to just
+the documents ``related'' to the Florida football teams, namely
+the Miami Dolphins, Jacksonville Jaguars, and Tampa Bay Buccaneers. 
+
+%\lstset{breaklines=true}
+%\lstset{tabsize=2}
+%\lstset{basicstyle=\small}
+%\begin{lstlisting}{language=SQL}
+\begin{small}
+\begin{alltt}
+\textit{Q1: Entity Resolution}
+SELECT DISTINCT docid
+FROM extracted_entities
+WHERE match('Jacksonville Jaguars', entity)
+   OR match('Miami Dolphins', entity)
+   OR match('Tampa Bay Buccaneers', entity);
+\end{alltt}
+\end{small}
+%\end{lstlisting}
+
+We note that match(TARGET_ENTITY, current_entity), is an Entity
+Resolution UDF, and ExtractedEntities is a view constructed 
+using an Entity Recognition function on textual documents as they
+are added to the database (In this case, likely news articles and blogs). A
+table of all current text analysis functions can be seen in Table 2.\\
+
+[this is where we want to put the table\ldots]
+
+Maybe the journalist wants to explore fan sentiment for the Jacksonville Jaguars
+based on tweets collected during the NFL season. Utilizing the first 
+query as a building block (with some changes), we can construct this 
+query as follows:
+
+%\lstset{breaklines=true}
+%\lstset{tabsize=2}
+%\lstset{basicstyle=\small}
+%\begin{lstlisting}{language=SQL}
+\begin{small}
+\begin{alltt}
+\textit{Q2: Entity Resolution and Sentiment Analysis}
+SELECT DISTINCT E.docid, E.entity
+FROM extracted_entities as E
+WHERE match('Jacksonville Jaguars', entity)
+   OR match('Jaguars', entity);
+   or match('Jags', entity)
+INNER JOIN
+SELECT S.docid, S.sentiment(document)
+FROM tweets as S
+HAVING sentiment(document) in ('+', '-')
+ON E.docid = S.docid;
+
+\end{alltt}
+\end{small}
+%\end{lstlisting}
+
+In this case, one could accomodate for nicknames through OR-matching
+the extracted entities, an alias table, among other strategies. Notice
+that going from a singular text analytics task, to a somewhat more 
+complex analysis only required a small change in our SQL query. 
+Whereas a traditional approach would have us either looking for a
+customized solution or patching together packages, the declarative
+sql approach allows the user to just state what the result is
+
+
+***** CONTINUE HERE *****
+[[match]
+ [detect]
+ [pos_tag]
+ [sentiment]
+ Maybe we can have more as time goes on\ldots]
+
+
 Suppose a sports journalist wants to do an investigative
 piece on overall public opinion of the Jacksonville Jaguars
 for the 2011-2012 season. Such a peice requires an in-depth analysis of news
