@@ -1,8 +1,7 @@
 \section{Text Analysis Queries and Demonstration}
-[Key points to think about]
-[How to present this as easy to use?]
-[How to carry the sports journalism story throughout]
+\subsection{Dataset for Example}
 
+\subsection{Text Analytics Queries}
 Based on our example dataset, suppose a sports journalist
 wants to do an investigative piece on overall public opinion 
 of all the Florida NFL teams during the 2011-2012 season. 
@@ -34,6 +33,7 @@ WHERE match('Jacksonville Jaguars', entity)
 \end{small}
 %\end{lstlisting}
 
+
 We note that match(TARGET_ENTITY, current_entity), is an Entity
 Resolution UDF, and ExtractedEntities is a view constructed 
 using an Entity Recognition function on textual documents as they
@@ -54,17 +54,13 @@ query as follows:
 \begin{small}
 \begin{alltt}
 \textit{Q2: Entity Resolution and Sentiment Analysis}
-SELECT DISTINCT E.docid, E.entity
-FROM extracted_entities as E
-WHERE match('Jacksonville Jaguars', entity)
-   OR match('Jaguars', entity);
-   or match('Jags', entity)
-INNER JOIN
-SELECT S.docid, S.sentiment(document)
-FROM tweets as S
-HAVING sentiment(document) in ('+', '-')
-ON E.docid = S.docid;
-
+SELECT DISTINCT E.docid, E.entity, sentiment(S.document)
+FROM extracted_entities as E, tweets as S
+WHERE E.docid = S.docid
+  AND sentiment(S.document) in ('+', '-')
+  AND (match('Jacksonville Jaguars', entity)
+       OR match('Jaguars', entity)
+       OR match('Jags', entity))
 \end{alltt}
 \end{small}
 %\end{lstlisting}
@@ -75,7 +71,35 @@ that going from a singular text analytics task, to a somewhat more
 complex analysis only required a small change in our SQL query. 
 Whereas a traditional approach would have us either looking for a
 customized solution or patching together packages, the declarative
-sql approach allows the user to just state what the result is
+sql approach allows the user to just state what the result is.
+
+Such queries can also be used in helping create visualizations. Our 
+journalist now wants to create a noun cloud that also displayed sentiment
+information related to the Miami Dolphins. Query 3 shows an example of this 
+type of analytics being processed
+
+%\lstset{breaklines=true}
+%\lstset{tabsize=2}
+%\lstset{basicstyle=\small}
+%\begin{lstlisting}{language=SQL}
+\begin{small}
+\begin{alltt}
+\textit{Q3: Part of Speech Extraction and Sentiment Analysis}
+
+SELECT sentiment(a.twtext) AS sent, pos_extract(b.twtext) AS
+pos, count(*) from tweets a, tweets b where a.id = b.id and
+group by part_of_speech, sentiment;
+\end{alltt}
+\end{small}
+%\end{lstlisting}
+\jag{This will need to be tested and probably rewritten before submitted,
+somewhat unsure.}
+
+
+
+\subsection{User Interface}
+
+
 
 
 ***** CONTINUE HERE *****
