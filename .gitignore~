@@ -1,0 +1,10 @@
+.project
+docs/.DS_Store
+docs/Proposal/.DS_Store
+Crawlers/.pydevproject
+paper/sigmod12/madden.aux
+paper/sigmod12/madden.log
+paper/sigmod12/madden.pdf
+paper/sigmod12/madden.synctex.gz
+paper/sigmod12/madden.bbl
+paper/sigmod12/madden.blg

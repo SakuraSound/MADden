@@ -12,40 +12,29 @@ Our demonstration will illustrate the following points:
 Our sample demonstration for MADden involves a variety of NFL based data sources. 
 The data is represented in Table \ref{tab:madschema} as an abbreviated
 schema\footnote{These tables may be extracted to an RDBMS, or defined over an
-API using a foreign data wrapper (fdw).}.The {\tt NFLCorpus} table holds blogs
+API using a foreign data wrapper (fdw).}.
+
+The {\tt NFLCorpus} table holds blogs
 and news articles crawled from the web, as well as tweets extracted using the
 Twitter Streaming API with a series of NFL related keywords. These documents
 vary in size and quality, with some potential out-of domain documents (mainly
-tweets). The other tables are more structured, including {\tt
-$PlayerStats2011_*$}, with * indicating passing ({\tt Pass}), Receiving ({\tt
+tweets). Each document holds a \textit{doc\_id}, \textit{doc\_type},
+\textit{text}, associated tags, and document metadata.
+
+The other tables are more structured,
+including {\tt PlayerStats2011\_*}, with * indicating passing ({\tt Pass}), Receiving ({\tt
 Rec}), Rushing ({\tt Rush}), Special Teams ({\tt ST}), or Defense ({\tt Def}).
-
-
-
-
-
-. This table contains
-millions of documents, varying in size and quality. The type of document 
-can be specified via the type attribute. The types include `news', `blogs' or
-`tweets'. The \textit{entry} attribute of {\tt NFLCorpus} contains the text data.
-The other tables are structured but the data may contain duplicates or
-misspelled terms. It is also possible for these documents to be out of domain.
-The {\tt Players} table is a list of individuals
-who play in the NFL. The player data is obtained from NFL.com
-The {\tt PlayerStats} table has a \textit{position} field that specifies
-the type of statistic that is inside of the \textit{stats} column.
-The {\tt PlayerAlias} table list alternative names for players.
-While this list may be obtained using topic modeling or word
-co-occurrence, we hand coded a list of alias names for a select
-group of well-known players. This helps in resolving players who are
-referred to by their nickname, `Sticky Fingers', in the case of
-`Larry Fitzgerald'.
-The {\tt Teams} table holds all the team
-names in the NFL and the {\tt TeamAlias} table has the alternate names for these
-teams. ``ARI'' as an abbreviation,  and ``Football Cardinals'' as a nickname, are 
-example entries in this table. {\tt GameStats} contains the amount of points scored by a 
-home and away team for each NFL game played.\\
-
+This data was extracted from the NFL.com player database. Each table contains
+the player's \textit{name}, \textit{position}, \textit{number}, and a series of
+stats corresponding to the stat type (Some players show up in multiple tables, others in only one). The
+{\tt Player} table holds information about a player in the NFL, including
+\textit{college}, \textit{birthday}, \textit{height}, \textit{weight}, as well
+as \textit{years\_in\_NFL}. The {\tt Team} table holds some basic information
+about the 32 NFL teams, including \textit{location}, \textit{conference}, \textit{division}, and \textit{stadium}.
+{\tt TeamStats\_2011} holds the team rankings and stats in a vareity of categories (Offense, Defense, Special Teams,
+Points, etc.).
+{\tt Extracted\_Entities} can either be a view or table, and it stores the
+extracted entities found in the {\tt NFLCorpus} documents.
 
 \begin{table}
 \begin{center}
@@ -53,15 +42,17 @@ home and away team for each NFL game played.\\
 \hline
 \multicolumn{2}{|c|}{Example Schema}\\
 \hline
-$match(target, against)$ & Entity Resolution\\
+$NFLCorpus$ & Documents table\\
 \hline
-$sentiment(text)$ & Sentiment Analysis\\
+$PlayerStats2011\_*$ & Player Stats tables for 2011\\
 \hline
-$entity_find(text, boolean)$ & Detects Named Entities\\
+$Player$ & Basic Player information\\
 \hline
-$pos_tag(text)$ & POS tagging\\
+$Team\_Stats2011$ & Total Team stats and rankings\\
 \hline
-$pos_extract(text, type)$ & POS term extraction \\
+$Team$ & Basic Team information \\
+\hline
+$Extracted\_Entities$ & View/Table of entities and documents \\
 \hline
 \end{tabular}
 \end{center}
@@ -92,11 +83,11 @@ the Miami Dolphins, Jacksonville Jaguars, and Tampa Bay Buccaneers.
 \begin{small}
 \begin{alltt}
 \textit{Q1: Entity Resolution}
-SELECT DISTINCT docid
+SELECT DISTINCT doc_id
 FROM extracted_entities
-WHERE match('Jaguars', entity) > .7
-   OR match('Dolphins', entity) > .7
-   OR match('Buccaneers', entity) > .7;
+WHERE match('Jaguars', entity) > match\_thresh
+   OR match('Dolphins', entity) > match\_thresh
+   OR match('Buccaneers', entity) > match\_thresh;
 \end{alltt}
 \end{small}
 %\end{lstlisting}
@@ -107,7 +98,7 @@ Resolution UDF, and ExtractedEntities is a view constructed
 using an Entity Recognition function on textual documents as they
 are added to the database (In this case, likely news articles and blogs). A
 table of all current text analysis functions can be seen in
-\ref{tab:madfunct}.\\
+\ref{tab:madfunct}. \\
 
 \begin{table}
 \begin{center}
@@ -119,11 +110,11 @@ $match(target, against)$ & Entity Resolution\\
 \hline
 $sentiment(text)$ & Sentiment Analysis\\
 \hline
-$entity_find(text, boolean)$ & Detects Named Entities\\
+$entity\_find(text, boolean)$ & Detects Named Entities\\
 \hline
-$pos_tag(text)$ & POS tagging\\
+$pos\_tag(text)$ & POS tagging\\
 \hline
-$pos_extract(text, type)$ & POS term extraction \\
+$pos\_extract(text, type)$ & POS term extraction \\
 \hline
 \end{tabular}
 \end{center}
@@ -145,9 +136,9 @@ query as follows:
 \textit{Q2: Entity Resolution and Sentiment Analysis}
 SELECT DISTINCT E.docid, E.entity, sentiment(S.document)
 FROM extracted_entities as E, NFLCorpus as S
-WHERE E.docid = S.docid
+WHERE E.doc_id = S.doc_id
   AND sentiment(S.document) in ('+', '-')
-  AND match('Jaguars', entity) > .7
+  AND match('Jaguars', E.entity) > match\_thresh
   AND S.type = 'tweet';
 \end{alltt}
 \end{small}
@@ -172,17 +163,19 @@ he could consult both the player stats table, as well as the media blogs:
 %\begin{lstlisting}{language=SQL}
 \begin{small}
 \begin{alltt}
-\textit{Q3: Entity Resolution and Sentiment Analysis}
+\textit{Q3: Structured & Unstructured}
 SELECT BestWR.name, sentiment(A.txt)
-FROM NFLCorpus A, (SELECT P.fname || ' ' || P.lname as name
-                   FROM PlayerStats2011_Rec P
-                   WHERE (P.team = 'Jaguars' 
-                      OR P.team = 'Dolphins' 
-                      OR P.team ='Buccaneers') 
-                   ORDER BY P.rec_yds DESC, P.recs ASC
-                   LIMIT 1) as BestWR
-WHERE match(BestWR.name, A.txt) > .7
-  AND (A.type = 'blog' OR A.type = 'News');
+FROM NFLCorpus A, extracted_entities E,
+         (SELECT P.fname || ' ' || P.lname as name
+          FROM PlayerStats2011_Rec P
+          WHERE P.team = 'Jaguars' 
+             OR P.team = 'Dolphins' 
+             OR P.team = 'Buccaneers'
+          ORDER BY P.rec_yds DESC, P.recs ASC
+          LIMIT 1) as BestWR
+WHERE E.doc_id = A.doc_id 
+  AND (A.type = 'blog' OR A.type = 'news')
+  AND match(BestWR.name, E.entity) > match\_thresh;
 \end{alltt}
 \end{small}
 %\end{lstlisting}
@@ -196,7 +189,6 @@ During the conference, we plan to give an interactive demonstration of the
 We built a user interface to allow the user to interact with \system. 
 We will allow the user to use tables from our NFL data set or political data
 for campaign management queries.
-
 
 
 For the demonstration, a web interface will be provided to interact with our
