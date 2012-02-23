@@ -1,5 +1,73 @@
 \section{Text Analysis Queries and Demonstration}
+Our demonstration will illustrate the following points: 
+\begin{enumerate}
+  \item The ability to perform statistical text analytics inside the DBMS
+  \item Query driven computation of analytics
+  \item The flexibility of our data sources by using structured data and text
+  \item Query execution over large amounts of text in real-time
+  \item Ability to perform textual analytics across multiple domains
+\end{enumerate} 
+
 \subsection{Dataset for Example}
+Our sample demonstration for MADden involves a variety of NFL based data sources. 
+The data is represented in Table \ref{tab:madschema} as an abbreviated
+schema\footnote{These tables may be extracted to an RDBMS, or defined over an
+API using a foreign data wrapper (fdw).}.The {\tt NFLCorpus} table holds blogs
+and news articles crawled from the web, as well as tweets extracted using the
+Twitter Streaming API with a series of NFL related keywords. These documents
+vary in size and quality, with some potential out-of domain documents (mainly
+tweets). The other tables are more structured, including {\tt
+$PlayerStats2011_*$}, with * indicating passing ({\tt Pass}), Receiving ({\tt
+Rec}), Rushing ({\tt Rush}), Special Teams ({\tt ST}), or Defense ({\tt Def}).
+
+
+
+
+
+. This table contains
+millions of documents, varying in size and quality. The type of document 
+can be specified via the type attribute. The types include `news', `blogs' or
+`tweets'. The \textit{entry} attribute of {\tt NFLCorpus} contains the text data.
+The other tables are structured but the data may contain duplicates or
+misspelled terms. It is also possible for these documents to be out of domain.
+The {\tt Players} table is a list of individuals
+who play in the NFL. The player data is obtained from NFL.com
+The {\tt PlayerStats} table has a \textit{position} field that specifies
+the type of statistic that is inside of the \textit{stats} column.
+The {\tt PlayerAlias} table list alternative names for players.
+While this list may be obtained using topic modeling or word
+co-occurrence, we hand coded a list of alias names for a select
+group of well-known players. This helps in resolving players who are
+referred to by their nickname, `Sticky Fingers', in the case of
+`Larry Fitzgerald'.
+The {\tt Teams} table holds all the team
+names in the NFL and the {\tt TeamAlias} table has the alternate names for these
+teams. ``ARI'' as an abbreviation,  and ``Football Cardinals'' as a nickname, are 
+example entries in this table. {\tt GameStats} contains the amount of points scored by a 
+home and away team for each NFL game played.\\
+
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\multicolumn{2}{|c|}{Example Schema}\\
+\hline
+$match(target, against)$ & Entity Resolution\\
+\hline
+$sentiment(text)$ & Sentiment Analysis\\
+\hline
+$entity_find(text, boolean)$ & Detects Named Entities\\
+\hline
+$pos_tag(text)$ & POS tagging\\
+\hline
+$pos_extract(text, type)$ & POS term extraction \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Listing of current MADden functions}
+\label{tab:madschema}
+\end{table}
 
 \subsection{Text Analytics Queries}
 Based on our example dataset, suppose a sports journalist
@@ -26,21 +94,42 @@ the Miami Dolphins, Jacksonville Jaguars, and Tampa Bay Buccaneers.
 \textit{Q1: Entity Resolution}
 SELECT DISTINCT docid
 FROM extracted_entities
-WHERE match('Jacksonville Jaguars', entity)
-   OR match('Miami Dolphins', entity)
-   OR match('Tampa Bay Buccaneers', entity);
+WHERE match('Jaguars', entity) > .7
+   OR match('Dolphins', entity) > .7
+   OR match('Buccaneers', entity) > .7;
 \end{alltt}
 \end{small}
 %\end{lstlisting}
 
 
-We note that match(TARGET_ENTITY, current_entity), is an Entity
+We note that $match(target, against)$, is an Entity
 Resolution UDF, and ExtractedEntities is a view constructed 
 using an Entity Recognition function on textual documents as they
 are added to the database (In this case, likely news articles and blogs). A
-table of all current text analysis functions can be seen in Table 2.\\
+table of all current text analysis functions can be seen in
+\ref{tab:madfunct}.\\
 
-[this is where we want to put the table\ldots]
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\multicolumn{2}{|c|}{Current MADden Functions}\\
+\hline
+$match(target, against)$ & Entity Resolution\\
+\hline
+$sentiment(text)$ & Sentiment Analysis\\
+\hline
+$entity_find(text, boolean)$ & Detects Named Entities\\
+\hline
+$pos_tag(text)$ & POS tagging\\
+\hline
+$pos_extract(text, type)$ & POS term extraction \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Listing of current MADden functions}
+\label{tab:madfunct}
+\end{table}
 
 Maybe the journalist wants to explore fan sentiment for the Jacksonville Jaguars
 based on tweets collected during the NFL season. Utilizing the first 
@@ -55,12 +144,11 @@ query as follows:
 \begin{alltt}
 \textit{Q2: Entity Resolution and Sentiment Analysis}
 SELECT DISTINCT E.docid, E.entity, sentiment(S.document)
-FROM extracted_entities as E, tweets as S
+FROM extracted_entities as E, NFLCorpus as S
 WHERE E.docid = S.docid
   AND sentiment(S.document) in ('+', '-')
-  AND (match('Jacksonville Jaguars', entity)
-       OR match('Jaguars', entity)
-       OR match('Jags', entity))
+  AND match('Jaguars', entity) > .7
+  AND S.type = 'tweet';
 \end{alltt}
 \end{small}
 %\end{lstlisting}
@@ -73,10 +161,10 @@ Whereas a traditional approach would have us either looking for a
 customized solution or patching together packages, the declarative
 sql approach allows the user to just state what the result is.
 
-Such queries can also be used in helping create visualizations. Our 
-journalist now wants to create a noun cloud that also displayed sentiment
-information related to the Miami Dolphins. Query 3 shows an example of this 
-type of analytics being processed
+And since we are working in SQL, we can combine queries on corpus 
+tables with tables of structured data. For example, if our journalist
+wants to analyze the media opinion of the state's best reciever,
+he could consult both the player stats table, as well as the media blogs:
 
 %\lstset{breaklines=true}
 %\lstset{tabsize=2}
@@ -84,103 +172,24 @@ type of analytics being processed
 %\begin{lstlisting}{language=SQL}
 \begin{small}
 \begin{alltt}
-\textit{Q3: Part of Speech Extraction and Sentiment Analysis}
-
-SELECT sentiment(a.twtext) AS sent, pos_extract(b.twtext) AS
-pos, count(*) from tweets a, tweets b where a.id = b.id and
-group by part_of_speech, sentiment;
+\textit{Q3: Entity Resolution and Sentiment Analysis}
+SELECT BestWR.name, sentiment(A.txt)
+FROM NFLCorpus A, (SELECT P.fname || ' ' || P.lname as name
+                   FROM PlayerStats2011_Rec P
+                   WHERE (P.team = 'Jaguars' 
+                      OR P.team = 'Dolphins' 
+                      OR P.team ='Buccaneers') 
+                   ORDER BY P.rec_yds DESC, P.recs ASC
+                   LIMIT 1) as BestWR
+WHERE match(BestWR.name, A.txt) > .7
+  AND (A.type = 'blog' OR A.type = 'News');
 \end{alltt}
 \end{small}
 %\end{lstlisting}
-\jag{This will need to be tested and probably rewritten before submitted,
-somewhat unsure.}
-
 
 
 \subsection{User Interface}
 
-
-
-
-***** CONTINUE HERE *****
-[[match]
- [detect]
- [pos_tag]
- [sentiment]
- Maybe we can have more as time goes on\ldots]
-
-
-Suppose a sports journalist wants to do an investigative
-piece on overall public opinion of the Jacksonville Jaguars
-for the 2011-2012 season. Such a peice requires an in-depth analysis of news
-reports, fan tweets, and football (NFL) blogs. And suppose we would also like 
-to correlate the team's performance to the public opinion. Such a query
-currently would require the combination of multiple tools, and \textit{code glue}
-to solve the problem. However with the MADden system, these queries require much
-less effort with SQL. Consider the simple query \textbf{Give me the positive
-sentiment involving the Jacksonville Jaguars and 'Maurice Jones-Drew} (Query 1).' 
-
-%\lstset{breaklines=true}
-%\lstset{tabsize=2}
-%\lstset{basicstyle=\small}
-%\begin{lstlisting}{language=SQL}
-\begin{small}
-\begin{alltt}
-\textit{Q1: Sentiment and ER example }
-SELECT e.freq, c.docid,  e.entry
-FROM NFLCorpus c
-    (SELECT docid, count(*) AS freq
-    FROM extract_entities
-    WHERE match('Jacksonville Jaguars', entity)) AS e
-WHERE sentiment(entry) = '+',
-AND match('Maurice Jones-Drew', entity)
-ORDER BY e.freq
-\end{alltt}
-\end{small}
-\label{}
-%\end{lstlisting}
-\jag{Why exactly does the match function have an entity flag attached to it??}
-\jag{Maybe a contains method as well . and this query just needs to be cleaned
-up}
-
-In this query, we have entity resolution (match function), and sentiment
-analysis (sentiment function), acting on a series of data tables NFLCorpus and
-ExtractEntities \jag{(name needs to change)}
-
-MADden's text analytics package is built alongside MADlib, through the use of
-user defined functions (UDFs). As with the existing MADlib toolkit, MADden's 
-declarative nature, allows the user to push queries through their datasets,
-rather than attempting to fit the data to a particular function or package.
-This becomes increasingly advantageous, as in many fields, such as sports
-journalism, investigative pieces are a combination of textual analysis and
-statistical insight. Combining both tasks is done in the same fashion as
-using subqueries in SQL. Now supposing that our sports journalist wants
-to obtain positive articles from the top 5 rushers of the 2012 NFL season,
-they can do so as follows:
-
-\jag{PLACE THIS QUERY HERE. . .}
-
-%\lstset{tabsize=2}
-%\lstset{breaklines=true}
-%\lstset{basicstyle=\small}
-%\begin{lstlisting}
-\begin{small}
-\begin{alltt}
-\textit{Q3: [Structured and Unstructured Data]}
-SELECT ts.pid, ts.date, g.hscore / g.ascore AS perf,
-  SUM(sentiment(c.entry))
-FROM Team t, TeamStats ts, NFLCorpus c, GameStats g
-WHERE c.type = 'tweet' AND t.name = 'Cardinals' 
-  AND t.id = g.hid AND gs.game_date = c.posted_at 
-  AND match(t.name,c.entry) IS true
-GROUP BY ts.pid, ts.date, g.hscore, g.ascore
-ORDER BY gs.game_date
-\end{alltt}
-\end{small}
-%\end{lstlisting}
-
-\jag{THis query is not representative of the one discussed\ldots just
-placeholder.}
 
 During the conference, we plan to give an interactive demonstration of the 
 {\system}'s capabilities.
@@ -188,14 +197,7 @@ We built a user interface to allow the user to interact with \system.
 We will allow the user to use tables from our NFL data set or political data
 for campaign management queries.
 
-Our demonstration will illustrate the following points: 
-\begin{enumerate}
-  \item The ability to perform statistical text analytics inside the DBMS
-  \item Query driven computation of analytics
-  \item The flexibility of our data sources by using structured data and text
-  \item Query execution over large amounts of text in real-time
-  \item Ability to perform textual analytics across multiple domains
-\end{enumerate} 
+
 
 For the demonstration, a web interface will be provided to interact with our
 system. It will utilize both a raw SQL UI, as well as a Mad
