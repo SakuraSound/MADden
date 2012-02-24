@@ -177,7 +177,7 @@ FROM   segtbl, mfactor, rfactor;
 
 %%%---------new pos section
 
-Core to many natural language processing(NLP) tasks, POS involves the
+Core to many natural language processing tasks, POS involves the
 labeling of terms within text based on their function in a particular sentence.
 \system uses our own implementation of POS in Postgres and Greenplum. We are
 committing our code to MADLib and it is in under review.
@@ -186,29 +186,32 @@ committing our code to MADLib and it is in under review.
 of a sequence of tokens. The factor graph has observed nodes on each sentence
 token, latent label variables attached to each token.
 Factors are only associated with one node at the beginning and end of the chain.
-All other factors are pair wise. 
-
-Training the tagger is a one time task that is performed outside the 
-DBMS and stored in XXX tables. \ceg{Add some detail on how training relates.}
+All other factors are pair wise.  \ceg{<-- Rewrite and put equation}
 
 In the linear chain CRF model, factors are connected one or two nodes.  
-We generate the features using a function YYY. \ceg{I don't think we need the
-actual name for the Viterbi method, we can use a fake more clean one for 
-readability}
+We generate the features using a function \textit{generatemrtbl}. 
 This function produces a table
 \textit{rfactor} for single state features and a table \textit{mfactor} for two
 state features.
 
+Training the CRF model is a one time task that is performed outside the 
+DBMS \footnote{We use the IIT Bombay package for training available at 
+http://crf.sourceforge.net }.
+We use a small python script to parse and import the trained model into 
+tables in the DBMS. 
+
 Inference is performed over the stored models in order to find the highest 
 assignment of labels in the model.
-We use develop a Viterbi top1 implementation, this method works by 
-\ceg{Add a quick description of how viteri works.}
+We calculate the top 1 most probable label assignment. This is calculated using
+the Viterbi dynamic programming algorithm over the label space.
 
-We use the python language to manage the work flow execution of feature 
-generation and inference.
-The computationally expensive functions viterbi are implemented as c-UDFs.
-The execution across a dataset is implemented in SQL, in GreenPlum the query
-is executed in parallel.
+
+We use the PL/Python language to execute manage the work flow of all the 
+calculations.
+The computationally expensive function viterbi is implemented as c-UDFs.
+The feature generation and execution of inference 
+over a table of sentences is implemented in SQL. When executed in GreenPlum 
+the query is performed in parallel.
 
 
 Implementing POS tagging inside the DBMS allows us to perform inference over a 
