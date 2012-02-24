@@ -4,22 +4,20 @@ Our demonstration will illustrate the following points:
   \item The ability to perform statistical text analytics inside the DBMS
   \item Query driven computation of analytics
   \item The flexibility of our data sources by using structured data and text
-  \item Query execution over large amounts of text in real-time
-  \item Ability to perform textual analytics across multiple domains
+  potentially across multiple domains
 \end{enumerate} 
-
 \subsection{Dataset for Example}
 Our sample demonstration for MADden involves a variety of NFL based data sources. 
 The data is represented in Table \ref{tab:madschema} as an abbreviated
 schema\footnote{These tables may be extracted to an RDBMS, or defined over an
 API using a foreign data wrapper (fdw).}.
 
-The {\tt NFLCorpus} table holds blogs
-and news articles crawled from the web, as well as tweets extracted using the
-Twitter Streaming API with a series of NFL related keywords. These documents
-vary in size and quality, with some potential out-of domain documents (mainly
-tweets). Each document holds a \textit{doc\_id}, \textit{doc\_type},
-\textit{text}, associated tags, and document metadata.
+The {\tt NFLCorpus} table holds semistructured data. Textual data from blogs,
+news articles, and fan tweets, with document metadata such as timestamp, tags,
+type, among others. The tweets were extracted using the Twitter Streaming API
+with a series of NFL related keywords, and the news articles and blogs were
+extracted from various sports media websites. These documents vary in size and
+quality, with some potential out-of domain documents (mainly tweets).
 
 The other tables are more structured,
 including {\tt PlayerStats2011\_*}, with * indicating passing ({\tt Pass}), Receiving ({\tt
@@ -42,38 +40,38 @@ extracted entities found in the {\tt NFLCorpus} documents.
 \hline
 \multicolumn{2}{|c|}{Example Schema}\\
 \hline
-$NFLCorpus$ & Documents table\\
+$NFLCorpus$ & \textit{doc\_id, type, text, tstmp, tags, \ldots}\\
 \hline
-$PlayerStats2011\_*$ & Player Stats tables for 2011\\
+$PlayerStats2011\_*$ & \textit{pid, specific stats\ldots }\\
 \hline
-$Player$ & Basic Player information\\
+$Player$ & \textit{pid, f\_name, l\_name, college, \ldots}\\
 \hline
-$Team\_Stats2011$ & Total Team stats and rankings\\
+$Team\_Stats2011$ & \textit{team, points, pass\_yds, stats\ldots}\\
 \hline
-$Team$ & Basic Team information \\
+$Team$ & \textit{team, city, state, stadium, \ldots}\\
 \hline
-$Extracted\_Entities$ & View/Table of entities and documents \\
+$Extracted\_Entities$ & \textit{doc\_id, entity, \ldots} \\
 \hline
+
 \end{tabular}
 \end{center}
-\caption{Listing of current MADden functions}
+\caption{Abbreviated NFL dataset schema}
 \label{tab:madschema}
 \end{table}
 
 \subsection{Text Analytics Queries}
 Based on our example dataset, suppose a sports journalist
 wants to do an investigative piece on overall public opinion 
-of all the Florida NFL teams during the 2011-2012 season. 
+of all Florida-based NFL teams during the 2011-2012 season. 
 Such a peice would require in-depth analysis of news reports,
-tweets, blog postings, among other sources. On the text
-analytics side of this problem, the standard approach would
+tweets, blog postings, among other sources. The standard approach would
 consist of trawling through the text sources either by hand
-with help, or utilizing a series of different text processing
+with help, or using a series of different text processing
 toolkits and packages, sometimes specialized for a singular 
-task. MADden can streamline this process, with its declarative,
-in-database approach to text analytics. A first step could 
+task. Instead of multiple tools, MADden can streamline this process, with its
+declarative, in-database approach to text analytics. A first step could 
 conceivably consist of paring your corpora down to just
-the documents ``related'' to the Florida football teams, namely
+the documents related to the Florida football teams, namely
 the Miami Dolphins, Jacksonville Jaguars, and Tampa Bay Buccaneers. 
 
 %\lstset{breaklines=true}
@@ -92,19 +90,23 @@ WHERE match('Jaguars', entity) > match\_thresh
 \end{small}
 %\end{lstlisting}
 
-
-We note that $match(target, against)$, is an Entity
-Resolution UDF, and ExtractedEntities is a view constructed 
-using an Entity Recognition function on textual documents as they
-are added to the database (In this case, likely news articles and blogs). A
-table of all current text analysis functions can be seen in
-\ref{tab:madfunct}. \\
+\jag{I believe we need to describe what form of ER we are doing\ldots
+If we want any form of credibility, I need to know what this is\ldots}
+The $match$ function used in Query 1 is an Entity
+Resolution UDF which calculates a $[0,1]$ bound inverse metric, where terms that
+are close to our target will have a higher score than those that are less
+similar. $Extracted\_Entities$ is a view constructed using $entity\_find$. 
+This function detects entities using one of two accuracy settings
+(high accuracy with lower recognition, or low accuracy with higher
+recognition), on textual documents as they are added to the database 
+(In this case, likely news articles and blogs). Table \ref{tab:madfunct} shows some of
+the current text analysis functions implemented in MADden. \\
 
 \begin{table}
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-\multicolumn{2}{|c|}{Current MADden Functions}\\
+\multicolumn{2}{|c|}{Functions}\\
 \hline
 $match(target, against)$ & Entity Resolution\\
 \hline
@@ -144,13 +146,13 @@ WHERE E.doc_id = S.doc_id
 \end{small}
 %\end{lstlisting}
 
-In this case, one could accomodate for nicknames through OR-matching
+In Query 2, one could accomodate for nicknames through OR-matching
 the extracted entities, an alias table, among other strategies. Notice
-that going from a singular text analytics task, to a somewhat more 
-complex analysis only required a small change in our SQL query. 
-Whereas a traditional approach would have us either looking for a
-customized solution or patching together packages, the declarative
-sql approach allows the user to just state what the result is.
+that going from a singular text analytics task, to a more 
+complex analysis only required a small change. Whereas a traditional
+approach would have us either looking for a customized solution or patching
+together packages, the declarative sql approach allows the user to just 
+state what the result is.
 
 And since we are working in SQL, we can combine queries on corpus 
 tables with tables of structured data. For example, if our journalist
@@ -164,14 +166,15 @@ he could consult both the player stats table, as well as the media blogs:
 \begin{small}
 \begin{alltt}
 \textit{Q3: Structured & Unstructured}
-SELECT BestWR.name, sentiment(A.txt)
+SELECT BestWR.name, sentiment(A.txt), A.txt
 FROM NFLCorpus A, extracted_entities E,
          (SELECT P.fname || ' ' || P.lname as name
-          FROM PlayerStats2011_Rec P
-          WHERE P.team = 'Jaguars' 
-             OR P.team = 'Dolphins' 
-             OR P.team = 'Buccaneers'
-          ORDER BY P.rec_yds DESC, P.recs ASC
+          FROM Player P, PlayerStats2011_Rec S
+          WHERE S.pid = P.pid
+            AND (   P.team = 'Jaguars' 
+                 OR P.team = 'Dolphins' 
+                 OR P.team = 'Buccaneers')
+          ORDER BY S.rec_yds DESC
           LIMIT 1) as BestWR
 WHERE E.doc_id = A.doc_id 
   AND (A.type = 'blog' OR A.type = 'news')
@@ -180,23 +183,30 @@ WHERE E.doc_id = A.doc_id
 \end{small}
 %\end{lstlisting}
 
+Query 3, our final example, utilizes standard structured sql tables {\tt Player}
+and {\tt PlayerStats2011\_Rec}, which represents players and their receiving
+stats. Our journalist finds the best receiver playing on a Florida NFL team
+based on receiving yards\footnote{Total yards over a season, yds/catch, and
+touchdowns usually decides who the best receiver was at the end of a season.}.
+Then, discover all the associated news and blog documents and perform entitiy
+resolution function on the extracted entities, returning the sentiment and text
+associated with that player. This method is not restricted to single domain
+analytics. One can run analytics combining different datasets (e.g. State
+Economies and the NFL), utilizing the same declarative in-database methods seen
+here.
 
 \subsection{User Interface}
 
 
 During the conference, we plan to give an interactive demonstration of the 
-{\system}'s capabilities.
-We built a user interface to allow the user to interact with \system. 
-We will allow the user to use tables from our NFL data set or political data
-for campaign management queries.
-
-
-For the demonstration, a web interface will be provided to interact with our
-system. It will utilize both a raw SQL UI, as well as a Mad
-Lib\footnote{http://en.wikipedia.org/wiki/Mad\_Libs} style interface. The raw
-SQL interface will allow users to type in their own SQL queries to interact with
-the datasets, while the Mad Libs interface will allow users to customize query
-templates through drop-down lists and text box completions.
+{\system}'s capabilities. The demonstration will be based around MADden UI,
+a web interface that allows users to perform analytic tasks on our dataset.
+MADden UI has two forms of interaction: raw SQL queries, and a Mad
+Lib\footnote{http://en.wikipedia.org/wiki/Mad\_Libs} style interface, with
+fill-in-the-blank query templates for quick interaction and visualization of
+results. 
+\jag{Probably need to put more here\ldots not sure what though. Maybe you guys
+can help\ldots but it seems like this is slowly getting too long.}
 
 Regardless of the interaction type, results from the queries will be presented 
 to the user through a vareity of visualizations

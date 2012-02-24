@@ -13,15 +13,14 @@ more than 1700 players) games would need a system that can analyze both the
 structured statistics (e.g., scores, biographic data) of teams and players and the
 unstructured tweets, blogs, and news about the games.
 
-In such applications, text analysis are performed over text data
+In such applications, analytics are performed over text data
 from many sources. Text analysis uses the state-of-the-art
 statistical machine learning (SML) methods to extract structured
 information, such as entities, relations, sentiments, topics, from
 text. The result of the text analysis can be joined with other
 structured data sources to perform analysis. For example, the sports
-journalist may want to join the sentiment result from tweets and the
-scores of an NFL team named the Arizona Cardinals\footnote{http://www.azcardinals.com} 
-to see their correlations.
+journalist may want to correlate fan sentiment from tweets with stats
+of the Miami Dolphins\footnote{http://www.miamidolphins.com/}.
 
 To our knowledge, there is no integrated system with a query
 interface that enables domain experts (e.g., journalists) to issues
@@ -72,9 +71,9 @@ text analysis over textual data involving different models.
 
 To support this over large data we need parallel algos. }
 
-\system supports a declarative query interface and real-time query
-processing that is needed for ad hoc analysis. SQL-like queries
-and ER (Entity-Relationship) models are used as a higher-level of
+\system supports a declarative query interface and \jag{REMOVE
+**}real-time \jag{** REMOVE} query processing that is needed for ad hoc
+analysis. SQL-like queries and ER (Entity-Relationship) models are used as a higher-level of
 abstraction of the SML models and inference methods for text
 analysis. Ad hoc query-driven text analysis enable exploratory
 queries and query refinement based on the results. Users of such
@@ -110,10 +109,9 @@ implementation is over PostgreSQL and Greenplum parallel databases,
 demonstrating the scalability of our system.}
 
 In the demonstration of \system, we will show the 
-following points in two application domains, namely the NFL
-and the presidential election.
+following points using football journalism as our driving example:
 \begin{itemize}
-\item Real-time processing of ad hoc queries 
+\item \jag{REMOVE **}Real-time\jag{** REMOVE} processing of ad hoc queries 
 involving statistical text analysis, such as sentiment analysis,
 information extraction, and entity resolution;
 \item Joining and aggregation between structured and information extracted

@@ -122,41 +122,47 @@ zhang2011combining}.
 
 \noindent
 \textbf{Part-of-Speech Tagging}\\
+\jag{This needs to be cleaned up a bit and some parts need to be distributed to
+other sections.
+I attempted to make the listings changes. And this is a general comment for the whole paper\ldots but we should
+think about using the [strings]{underscore} package, considering all the
+underscores we are escaping (Probably better comment for future papers\ldots)}
+
 
 Core to many natural language processing(NLP) tasks, POS involves the
-labeling of
-terms within text based on their function in a particular sentence. MADden
-uses our
-own implementation of POS in Postgres and Greenplum. We are committing our
-code to
-MADLib and it is in under review. The advantage of our implementation lies
-in two
-aspects. The first one is that we extract features for each distinct
-tokens instead of
-for every tokens.  It is the easy to imagine the benefit it can bring when
-we are
-labeling a large corpus since the number of distinct tokens is limited to
-the size
-of English vocabulary. We have a function
-'MADLIB\_SCHEMA.textfex\_generatemrtbl' to
-generate all the features. This function produces two factors tables: a
-'rfactor'
-table, which store single state features, e.g., 'RegexFeature' and a
-'mfactor'
-table to store the two state features such as 'EdgeFeature'.  The second
-advantage is
+labeling of terms within text based on their function in a particular sentence.
+MADden uses our own implementation of POS in Postgres and Greenplum. We are
+committing our code to MADLib and it is in under review. The advantage of our
+implementation lies in two aspects. The first one is that we extract features
+for each distinct tokens instead of for every tokens.  It is the easy to imagine
+the benefit it can bring when we are labeling a large corpus since the number of
+distinct tokens is limited to the size of English vocabulary. We have a function
+{\tt MADLIB\_SCHEMA.textfex\_generatemrtbl} to generate all the features. This
+function produces two factors tables: a {\tt rfactor} table, which store single
+state features, e.g., \textit{RegexFeature} and a {\tt mfactor} table to store
+the two state features such as \textit{EdgeFeature}.  The second advantage is
 that we use SQL statements as the control flow driver which is inherently
 parallel for POS tagging. And the computation intensive functions are
-implemented in C. The
-following SQL statements is for geting the best POS label sequence for all
-sentences
-stored in segtbl.  For each sentence,
-'MADLIB\_SCHEMA.\_\_vcrf\_top1\_label' implemented in
+implemented in C. The following SQL statements is for geting the best POS label 
+sequence for all sentences stored in segtbl. For each sentence,
+{\tt MADLIB\_SCHEMA}.\textit{\_\_vcrf\_top1\_label} implemented in
 C is invoked to get the best label sequence.
 
+
+%\lstset{breaklines=true}
+%\lstset{tabsize=2}
+%\lstset{basicstyle=\small}
+%\begin{lstlisting}{language=SQL}
+\begin{small}
+\begin{alltt}
 INSERT INTO resulttbl
 
-SELECT   segtbl.doc\_id, MADLIB\_SCHEMA.\_\_vcrf\_top1\_label(segtbl.seglist,
-        mfactor.score, rfactor.score)
-
+SELECT segtbl.doc\_id, 
+       MADLIB\_SCHEMA.\_\_vcrf\_top1\_label(segtbl.seglist,
+                                            mfactor.score, rfactor.score)
 FROM   segtbl, mfactor, rfactor;
+
+\end{alltt}
+\end{small}
+%\end{lstlisting}
+
