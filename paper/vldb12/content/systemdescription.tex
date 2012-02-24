@@ -1,8 +1,17 @@
 
 \section{System Description}
 
-We discuss the architecture, functionalities, and the implementation of
-the {\system} system.
+In this section we first discuss the general architecture the {\system} 
+system. Next, we discuss the spirit and motivation behind the \system 
+implementation of the text analysis algorithms.
+Next, we discuss how \system excels with the difference classes of algorithms
+implemented. 
+Then we discuss how parallel database architectures improve query 
+processing times.
+Lastly, we propose our part-of-speech (POS) tagging implementation to 
+give a practical example of a \system algorithm implementation.
+
+
 \begin{figure}
    \begin{center}
         \includegraphics[scale=0.2]{content/graphics/arch.png}
@@ -21,17 +30,11 @@ add statistical and text processing functionality.
 It is important to emphasize that MADlib and {\system} perform functions
 at the same logical layer.  These queries are processed using 
 PostgreSQL and Greenplum's Parallel DB architecture to further optimize on 
-replicated storage. 
+replicated storage and parallel query optimization. 
 
 
 %\subsection{{\system} Implementation}
 
-In this section we discuss the spirit behind the \system implementation
-of the text analysis algorithms. 
-Next, we discuss the how we use user queries and the DBMS to in 
-information extraction, entity resolution and part-of-speech (POS) tagging.
-Finally, we discuss how parallel database architectures improve query 
-processing times.
 
 
 % -------------------------------------------- Rewrite
@@ -60,17 +63,17 @@ During development of algorithms in MADden or MADLib we take these options
 into consideration.
 
 
-\subsection{Query-driven Algorithms}
+\subsection{In-Database Algorithms}
 
-
+In this section we describe the {\system} algorithms.
 Many approaches exist for in-database information extraction. 
 We build on our previous work using Conditional Random Fields (CRFs) for 
 query-time information extraction \cite{wang2011hybrid}.
-\ceg{Here better describe the information extraction task}
 We use an hybrid approach to information extraction where we perform the 
 extraction and the inference inside of the database. We rely on information
 provided in the query to make decision on the type of algorithm used 
-for extraction. For example, we use viterbi if ... o.w. we use.. \ceg{TODO fix this to better explain why query driven is good}
+for extraction. 
+We discuss this in detail in section \ref{sec:impdis}.
 
 In {\system} we encounter situations requiring entity resolution problem.
 Entity resolution or co-reference resolution is the problem where given any two
@@ -104,7 +107,7 @@ with {\system}. Each node within the parallel DB could run some query
 over a subset of the data (data parallel). This includes the statistical methods
 in MADLib, which were all built to be data parallel.
 
-In part-of-speech (POS) tagging of a corpra is an integral task for many 
+In POS tagging of a corpra is an integral task for many 
 textual analytic operations. POS tagging can be performed per-paragraph or 
 per-sentence meaning the process is easily parallelizeable in our queries.
 
@@ -120,8 +123,12 @@ zhang2011combining}.
 \ceg{Kun, this is where Kun's section should go. We may want to move this back into the query driven algorithms section}
 
 
-\noindent
-\textbf{Part-of-Speech Tagging}\\
+\subsection{Implementation Discussion}
+\label{sec:impdis}
+
+\eat{
+%\noindent
+%\textbf{Part-of-Speech Tagging}\\
 \jag{This needs to be cleaned up a bit and some parts need to be distributed to
 other sections.
 I attempted to make the listings changes. And this is a general comment for the whole paper\ldots but we should
@@ -165,4 +172,56 @@ FROM   segtbl, mfactor, rfactor;
 \end{alltt}
 \end{small}
 %\end{lstlisting}
+}
+
+
+%%%---------new pos section
+
+Core to many natural language processing(NLP) tasks, POS involves the
+labeling of terms within text based on their function in a particular sentence.
+\system uses our own implementation of POS in Postgres and Greenplum. We are
+committing our code to MADLib and it is in under review.
+
+\system uses first order chain conditional random field to model the labeling
+of a sequence of tokens. The factor graph has observed nodes on each sentence
+token, latent label variables attached to each token.
+Factors are only associated with one node at the beginning and end of the chain.
+All other factors are pair wise. 
+
+Training the tagger is a one time task that is performed outside the 
+DBMS and stored in XXX tables. \ceg{Add some detail on how training relates.}
+
+In the linear chain CRF model, factors are connected one or two nodes.  
+We generate the features using a function YYY. \ceg{I don't think we need the
+actual name for the Viterbi method, we can use a fake more clean one for 
+readability}
+This function produces a table
+\textit{rfactor} for single state features and a table \textit{mfactor} for two
+state features.
+
+Inference is performed over the stored models in order to find the highest 
+assignment of labels in the model.
+We use develop a Viterbi top1 implementation, this method works by 
+\ceg{Add a quick description of how viteri works.}
+
+We use the python language to manage the work flow execution of feature 
+generation and inference.
+The computationally expensive functions viterbi are implemented as c-UDFs.
+The execution across a dataset is implemented in SQL, in GreenPlum the query
+is executed in parallel.
+
+
+Implementing POS tagging inside the DBMS allows us to perform inference over a 
+subset of tokens response to a query instead of performing batch tagging over 
+all tokens.
+We also get the benefit of using the query engine to parallelize our queries
+without losing the ability to drive the work flow using PL/Python.
+
+
+\ceg{Example execution call of the pos function for a subset of data maybe
+perform POS tagging only for sentences that contain 'Jaguars'.}
+
+
+
+%-----------end new pos section
 
