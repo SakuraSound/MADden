@@ -43,7 +43,7 @@ replicated storage and parallel query optimization.
 
 
 % All new stuff-------------% -------------% ----------------
-\subsection{MADden Implementation}
+\subsection{In-datbase Implementation}
 To enable text analytics, {\system} works alongside statistical
 functions found in the MADlib library \cite{Cohen:2009:MSN:1687553.1687576}.
 The implemented algorithms are developed to take advantage of the 
@@ -62,8 +62,12 @@ or custom c-UDFs.
 During development of algorithms in MADden or MADLib we take these options 
 into consideration.
 
+Table \ref{tab:madschema} describes a list of statistical text 
+analysis tasks.
+{\system}.
 
-\subsection{In-Database Algorithms}
+
+\subsection{Query-driven Statistical Text Analysis}
 
 In this section we describe the {\system} algorithms.
 Many approaches exist for in-database information extraction. 
@@ -90,13 +94,14 @@ analysis on documents. We can scan the inverted index of each
 document, filtering out documents that do not contain instances of the player names.
 To handle misspellings and nicknames we use trigram indices to perform 
 approximate matches of searches for names \cite{Jain:2009:BQO:1519103.1519108}.
-\ceg{Explain why this is query driven technique and expplain the alternative}
+This method allows us to use indices to perform queries on only the relevant
+portions of the data set, this way we do no extra work.
 
-Each text analysis function creates a view that can continue to be utilized.
+Each text analysis function creates a view that can continue to be called.
 Since views can be queried in the same manner as tables, we can join calculated
 statistics with other tables, or other text analysis views, to construct more
 interesting results. This, combined with expressing text analysis functionality
-within a SQL query, allows for more complex queries to be realized. \\
+within a SQL query, allows for more complex queries to be realized. 
 
 
 
@@ -120,60 +125,10 @@ nature for negative sentiment. Much work has already been done in this
 area for document-level and entity-level sentiment \cite{o2010tweets,
 zhang2011combining}. 
 {\system} can apply sentiment analysis at document and sentence level.
-\ceg{Kun, this is where Kun's section should go. We may want to move this back into the query driven algorithms section}
 
 
-\subsection{Implementation Discussion}
+\subsection{Implementation Details}
 \label{sec:impdis}
-
-\eat{
-%\noindent
-%\textbf{Part-of-Speech Tagging}\\
-\jag{This needs to be cleaned up a bit and some parts need to be distributed to
-other sections.
-I attempted to make the listings changes. And this is a general comment for the whole paper\ldots but we should
-think about using the [strings]{underscore} package, considering all the
-underscores we are escaping (Probably better comment for future papers\ldots)}
-
-
-Core to many natural language processing(NLP) tasks, POS involves the
-labeling of terms within text based on their function in a particular sentence.
-MADden uses our own implementation of POS in Postgres and Greenplum. We are
-committing our code to MADLib and it is in under review. The advantage of our
-implementation lies in two aspects. The first one is that we extract features
-for each distinct tokens instead of for every tokens.  It is the easy to imagine
-the benefit it can bring when we are labeling a large corpus since the number of
-distinct tokens is limited to the size of English vocabulary. We have a function
-{\tt MADLIB\_SCHEMA.textfex\_generatemrtbl} to generate all the features. This
-function produces two factors tables: a {\tt rfactor} table, which store single
-state features, e.g., \textit{RegexFeature} and a {\tt mfactor} table to store
-the two state features such as \textit{EdgeFeature}.  The second advantage is
-that we use SQL statements as the control flow driver which is inherently
-parallel for POS tagging. And the computation intensive functions are
-implemented in C. The following SQL statements is for geting the best POS label 
-sequence for all sentences stored in segtbl. For each sentence,
-{\tt MADLIB\_SCHEMA}.\textit{\_\_vcrf\_top1\_label} implemented in
-C is invoked to get the best label sequence.
-
-
-%\lstset{breaklines=true}
-%\lstset{tabsize=2}
-%\lstset{basicstyle=\small}
-%\begin{lstlisting}{language=SQL}
-\begin{small}
-\begin{alltt}
-INSERT INTO resulttbl
-
-SELECT segtbl.doc\_id, 
-       MADLIB\_SCHEMA.\_\_vcrf\_top1\_label(segtbl.seglist,
-                                            mfactor.score, rfactor.score)
-FROM   segtbl, mfactor, rfactor;
-
-\end{alltt}
-\end{small}
-%\end{lstlisting}
-}
-
 
 %%%---------new pos section
 
@@ -186,13 +141,10 @@ committing our code to MADLib and it is in under review.
 of a sequence of tokens. The factor graph has observed nodes on each sentence
 token, latent label variables attached to each token.
 Factors are only associated with one node at the beginning and end of the chain.
-All other factors are pair wise.  \ceg{<-- Rewrite and put equation}
-
-In the linear chain CRF model, factors are connected one or two nodes.  
+All other factors are pairwise.  
 We generate the features using a function \textit{generatemrtbl}. 
-This function produces a table
-\textit{rfactor} for single state features and a table \textit{mfactor} for two
-state features.
+This function produces a table \textit{rfactor} for single state features and a 
+table \textit{mfactor} for two state features.
 
 Training the CRF model is a one time task that is performed outside the 
 DBMS \footnote{We use the IIT Bombay package for training available at 
@@ -221,10 +173,37 @@ We also get the benefit of using the query engine to parallelize our queries
 without losing the ability to drive the work flow using PL/Python.
 
 
-\ceg{Example execution call of the pos function for a subset of data maybe
-perform POS tagging only for sentences that contain 'Jaguars'.}
+Example \textit{Q0} performs POS tagging for  all the sentences that contain
+the word 'Jaguar'. This query interface allows the user to easily perform
+functions on a subset of the data.
+The \textit{segmenttbl} holds a list of words and their position for each
+document (\textit{doc\_id}). We assume a document is an sequence of characters.
 
 
+
+\begin{small}
+\begin{alltt}
+\textit{Q0: POS tagging on sentences with the word `Jaguars' }
+SELECT DISTINCT ON segtbl.doc_id,
+    viterbi(segtbl.seglist,mfactor.score,rfactor.score)
+FROM segmenttbl, mfactor, rfactor, 
+    (SELECT doc_id, string_agg(seg_tex, ',') AS seglist
+     FROM segtbl 
+     GROUP BY doc_id ) AS segtbl
+WHERE segtbl.doc_id = segmenttbl.doc_id 
+    AND segmenttbl.seg_text='Jaguar';
+\end{alltt}
+\end{small}
 
 %-----------end new pos section
+
+
+
+
+
+
+
+
+
+
 

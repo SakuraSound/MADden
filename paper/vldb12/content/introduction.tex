@@ -51,14 +51,14 @@ imported into a database to be joined with the score statistics.}
 % real-time analysis enable exploratory queries and query refinement based on result
 % many applications: computational journalism, campaign management, e-discovery, etc.
 
-In this demonstration paper, we describe \system, an integrated
+In this demonstration paper, we describe \system, a library and integrated
 system that supports both relational query processing and
 statistical analysis over text. \system is implemented alongside MADLib,
 a collection of libraries developed on 
 top of PostgreSQL/Greenplum. MADLib supports
 in-database statistical methods, and in particular, the work on in-database text extraction
  from BayesStore~\cite{Wang:2008:BML:1453856.1453896} is being integrated into
- MADLib. \system adapt the statistical methods in MADLib for various text analysis tasks, including classification using Naive Bayes, information extraction using CRF,
+ MADLib. \system adapts the statistical methods in MADLib for various text analysis tasks, including classification using Naive Bayes, information extraction using CRF,
 and add entity resolution functionality using q-grams.
 
 \eat{
@@ -71,8 +71,8 @@ text analysis over textual data involving different models.
 
 To support this over large data we need parallel algos. }
 
-\system supports a declarative query interface and \jag{REMOVE
-**}real-time \jag{** REMOVE} query processing that is needed for ad hoc
+\system supports a declarative query interface and declarative query processing 
+that is needed for ad hoc
 analysis. SQL-like queries and ER (Entity-Relationship) models are used as a higher-level of
 abstraction of the SML models and inference methods for text
 analysis. Ad hoc query-driven text analysis enable exploratory
@@ -111,7 +111,7 @@ demonstrating the scalability of our system.}
 In the demonstration of \system, we will show the 
 following points using football journalism as our driving example:
 \begin{itemize}
-\item \jag{REMOVE **}Real-time\jag{** REMOVE} processing of ad hoc queries 
+\item declarative processing of ad hoc queries 
 involving statistical text analysis, such as sentiment analysis,
 information extraction, and entity resolution;
 \item Joining and aggregation between structured and information extracted
