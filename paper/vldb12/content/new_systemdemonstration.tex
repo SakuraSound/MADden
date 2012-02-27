@@ -90,8 +90,6 @@ WHERE match('Jaguars', entity) > match\_thresh
 \end{small}
 %\end{lstlisting}
 
-\jag{I believe we need to describe what form of ER we are doing\ldots
-If we want any form of credibility, I need to know what this is\ldots}
 The $match$ function used in Query 1 is an Entity
 Resolution UDF which calculates a $[0,1]$ bound inverse metric, where terms that
 are close to our target will have a higher score than those that are less
@@ -197,17 +195,22 @@ here.
 
 \subsection{User Interface}
 
-
 During the conference, we plan to give an interactive demonstration of the 
 {\system}'s capabilities. The demonstration will be based around MADden UI,
 a web interface that allows users to perform analytic tasks on our dataset.
 MADden UI has two forms of interaction: raw SQL queries, and a Mad
 Lib\footnote{http://en.wikipedia.org/wiki/Mad\_Libs} style interface, with
-fill-in-the-blank query templates for quick interaction and visualization of
-results. 
-\jag{Probably need to put more here\ldots not sure what though. Maybe you guys
-can help\ldots but it seems like this is slowly getting too long.}
+fill-in-the-blank query templates for quick interaction as seen in Figure
+2.
 
-Regardless of the interaction type, results from the queries will be presented 
-to the user through a vareity of visualizations
+\begin{figure}
+\begin{center}
+	\includegraphics[scale=.43]{content/graphics/example_madlib.png}
+\end{center}
+\caption{Example MADden UI query template} 
+\label{fig:madlib}
+\end{figure}
 
+For the demonstration, for ease of interpreting results, a series of
+visualizations will be made available in the MADden UI. We will also provide
+different datasets to combine and query upon using MADden as well.
