@@ -1,4 +1,3 @@
-
 -- A function to create qgrams from strings in postgres
 -- Taken from http://pages.stern.nyu.edu/~panos/datacleaning/qgrams.sql
 
@@ -31,6 +30,8 @@ SELECT cgrant_make_qgram(1, 3, 'Hello');
 
 
 -- Compares two strings by creating qgrams
+-- This returns the set of overlapped qgrams
+-- k is the distance of possible matches
 CREATE OR REPLACE FUNCTION cgrant_compare(doc_id1 numeric, s1 text, doc_id2 numeric, s2 text, k numeric) RETURNS TABLE (token1 text, token2 text) AS
 $$
 DECLARE s1len integer;
@@ -54,7 +55,8 @@ select cgrant_compare(0, 'The big black dog', 1, 'The bigger black dog', 4);
 */
 
 
-
+-- This returns the distance measure for the two strings
+-- k is the distance of possible matches
 CREATE OR REPLACE FUNCTION cgrant_distance(doc_id1 numeric, s1 text, doc_id2 numeric, s2 text, k numeric) RETURNS decimal AS
 $$
 DECLARE s1len integer;
