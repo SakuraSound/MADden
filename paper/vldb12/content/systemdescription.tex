@@ -174,7 +174,7 @@ without losing the ability to drive the work flow using PL/Python.
 
 
 Example \textit{Q0} performs POS tagging for  all the sentences that contain
-the word 'Jaguar'. This query interface allows the user to easily perform
+the word 'Jaguar'. This query interface allows the user to perform
 functions on a subset of the data.
 The \textit{segmenttbl} holds a list of words and their position for each
 document (\textit{doc\_id}). We assume a document is an sequence of characters.
@@ -183,13 +183,14 @@ document (\textit{doc\_id}). We assume a document is an sequence of characters.
 
 \begin{small}
 \begin{alltt}
-\textit{Q0: POS tagging on sentences with the word `Jaguars' }
+\textit{Q0: POS tagging on sentences with the word `Jaguars'}
 SELECT DISTINCT ON segtbl.doc_id,
     viterbi(segtbl.seglist,mfactor.score,rfactor.score)
 FROM segmenttbl, mfactor, rfactor, 
-    (SELECT doc_id, string_agg(seg_tex, ',') AS seglist
+    (SELECT doc_id, array_agg(seg_id ORDER BY start_pos)
+			AS seglist
      FROM segtbl 
-     GROUP BY doc_id ) AS segtbl
+     GROUP BY doc_id) AS segtbl
 WHERE segtbl.doc_id = segmenttbl.doc_id 
     AND segmenttbl.seg_text='Jaguar';
 \end{alltt}

@@ -1,15 +1,33 @@
 
 \section{Related Work}
 
-There are existing techniques to add text analytics inside of 
-traditional databases \cite{Jain:2009:BQO:1519103.1519108, Li:2011:SDI:2002440.2002459}.
-These system are mostly rule based and do not provide advanced
-statistical methods.
+%There are existing techniques to add text analytics inside of 
+%traditional databases \cite{Jain:2009:BQO:1519103.1519108, Li:2011:SDI:2002440.2002459}.
+%These system are mostly rule based and do not provide advanced
+%statistical methods.
 
 Systems such as Hazy \cite{Koc:2011:IMC:1952376.1952380}, 
 WordSeer \cite{muralidharanvisual} and with BayesStore \cite{Wang:2008:BML:1453856.1453896} provide statistical 
 methods inside databases but none of them provide a 
 comprehensive toolkit of techniques for querying text within a single query.
 
-Denilson Barbosa stuff ...
+%Denilson Barbosa stuff ...
+
+Browse Query Language (BQL\footnote{\url{http://senseidb.github.com/sensei/bql.html}}) developed for SensiDB and 
+TweeQL \cite{Marcus:2012:PVD:2094114.2094120} are custom SQL
+implementations developed especially for text search.
+BQL is an SQL-like interface to a distributed database back end that is highly
+specialized for text search. Unlike common NoSQL systems, SenseiDB is able to 
+perform joins but lacks transactions. 
+Creating advanced statistical queries would require serious engineering effort.
+TweeQL is an SQL-like interface to the twitter over data stream that supports 
+sophisticated UDFs, complex data types,
+a query optimizer other basic relational operations.
+Unfortunately, the system does not have the same computational power as RDBMS.
+
+SystemT is an information extraction system that provides declarative information
+extraction across text documents.
+A SIGMOD tutorial gives an in-depth survey of similar systems
+\cite{Chiticariu:2010:EIE:1807167.1807339}.
+None of the systems mentioned provide a copious library of statistical methods.
 
