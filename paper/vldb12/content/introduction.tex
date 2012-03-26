@@ -2,9 +2,10 @@
 \section{Introduction}
 
 % increasing amounts of unstructured text data
-The field of database management has traditionally focused on
+\eat{The field of database management has traditionally focused on
 structured data, providing little or no help for the significantly
-larger amounts of the world's data that is unstructured. For many
+larger amounts of the world's data that is unstructured.}
+For many
 applications, unstructured text and structured data are both
 important natural resources to fuel data analysis. For example, a
 sports journalist covering NFL (National Football
@@ -14,17 +15,20 @@ structured statistics (e.g., scores, biographic data) of teams and players and t
 unstructured tweets, blogs, and news about the games.
 
 In such applications, analytics are performed over text data
-from many sources. Text analysis uses the state-of-the-art
+from many sources. Text analysis uses 
 statistical machine learning (SML) methods to extract structured
-information, such as entities, relations, sentiments, topics, from
+information, such as part-of-speech tags, entities, relations, 
+sentiments, topics, from
 text. The result of the text analysis can be joined with other
 structured data sources to perform analysis. For example, the sports
-journalist may want to correlate fan sentiment from tweets with stats
+journalist may want to correlate fan sentiment from tweets 
+with stats \ceg{We need to be more specific here}
 of the Miami Dolphins\footnote{http://www.miamidolphins.com/}.
 
-To our knowledge, there is no integrated system with a query
+\eat{To our knowledge, there is no integrated system with a query
 interface that enables domain experts (e.g., journalists) to issues
-such ad hoc exploratory queries. To answer such queries, a software
+such ad hoc exploratory queries.}
+To answer such queries, a software
 developer is needed to understand and connect multiple tools,
 including Lucene for text search, Weka or MATLAB for sentiment
 analysis, and a database for joining the structured data with the
@@ -51,7 +55,8 @@ imported into a database to be joined with the score statistics.}
 % real-time analysis enable exploratory queries and query refinement based on result
 % many applications: computational journalism, campaign management, e-discovery, etc.
 
-In this demonstration paper, we describe \system, a library and integrated
+\eat{
+We describe \system, a library and integrated
 system that supports both relational query processing and
 statistical analysis over text. \system is implemented alongside MADLib,
 a collection of libraries developed on 
@@ -107,10 +112,12 @@ standard SPJ (Select-Project-Join) queries we demonstrate inference
 algorithms using native database techniques. Additionally, we
 implementation is over PostgreSQL and Greenplum parallel databases,
 demonstrating the scalability of our system.}
+}
+
 
 In the demonstration of \system, we will show the 
 following points using football journalism as our driving example:
-\begin{itemize}
+\begin{itemize}[noitemsep]
 \item declarative processing of ad hoc queries 
 involving statistical text analysis, such as sentiment analysis,
 information extraction, and entity resolution;
