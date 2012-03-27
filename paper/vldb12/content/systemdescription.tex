@@ -1,15 +1,10 @@
 
 \section{System Description}
 
-In this section we first discuss the general architecture the {\system} 
-system. Next, we discuss the spirit and motivation behind the \system 
-implementation of the text analysis algorithms.
-Next, we discuss how \system excels with the difference classes of algorithms
-implemented. 
-Then we discuss how parallel database architectures improve query 
-processing times.
-Lastly, we propose our part-of-speech (POS) tagging implementation to 
-give a practical example of a \system algorithm implementation.
+In this section we first discuss the general architecture the
+spirit behind the implementation of the text analysis algorithms.
+Then we give an example of POS tagging implementation within 
+\system.
 
 
 \begin{figure}
@@ -43,7 +38,7 @@ replicated storage and parallel query optimization.
 
 
 % All new stuff-------------% -------------% ----------------
-\subsection{In-datbase Implementation}
+%\subsection{In-datbase Implementation}
 To enable text analytics, {\system} works alongside statistical
 functions found in the MADlib library \cite{Cohen:2009:MSN:1687553.1687576}.
 The implemented algorithms are developed to take advantage of the 
@@ -62,69 +57,69 @@ or custom c-UDFs.
 During development of algorithms in MADden or MADLib we take these options 
 into consideration.
 
-Table \ref{tab:madschema} describes a list of statistical text 
+Table \ref{tab:madfunct} describes a list of statistical text 
 analysis tasks.
 {\system}.
 
 
-\subsection{Query-driven Statistical Text Analysis}
+\subsection{Statistical Text Analysis Functions}
 
-In this section we describe the {\system} algorithms.
+In this section we describe various text analysis algorithms.
 Many approaches exist for in-database information extraction. 
 We build on our previous work using Conditional Random Fields (CRFs) for 
 query-time information extraction \cite{wang2011hybrid}.
-We use an hybrid approach to information extraction where we perform the 
-extraction and the inference inside of the database. We rely on information
+We perform the extraction and the inference inside of the database. 
+We rely on information
 provided in the query to make decision on the type of algorithm used 
 for extraction. 
-We discuss this in detail in section \ref{sec:impdis}.
 
-In {\system} we encounter situations requiring entity resolution problem.
 Entity resolution or co-reference resolution is the problem where given any two
 mentions of a name, the are clustered only if they refer to the same real 
-world entity. This problem is difficult because you can have mentions that are
+world entity. 
+\eat{This problem is difficult because you can have mentions that are
 spelled the same but refer to different entities and conversely we different
-spelling that may refer to the same entity.
+spelling that may refer to the same entity.}
 Certain entities may be misrepresented by the presence of different names, 
 misspellings in the text, or aliases. It is important to
 resolve these entities appropriately to better understand the data. Increasingly
 informal text, such as blog posts and tweets requires entity resolution. 
-{\system} utilizes inverted indices within the database to perform text
-analysis on documents. We can scan the inverted index of each 
-document, filtering out documents that do not contain instances of the player names.
+\eat{{\system} use inverted indices within the database to perform text
+analysis on documents.We can scan the inverted indices of each 
+document, filtering out documents that do not contain instances of the player names.}
 To handle misspellings and nicknames we use trigram indices to perform 
-approximate matches of searches for names \cite{Jain:2009:BQO:1519103.1519108}.
+approximate matches of searches for names as database queries 
+\cite{Jain:2009:BQO:1519103.1519108}. 
 This method allows us to use indices to perform queries on only the relevant
-portions of the data set, this way we do no extra work.
+portions of the data set, this way we do no extra processing.
 
-Each text analysis function creates a view that can continue to be called.
-Since views can be queried in the same manner as tables, we can join calculated
-statistics with other tables, or other text analysis views, to construct more
-interesting results. This, combined with expressing text analysis functionality
-within a SQL query, allows for more complex queries to be realized. 
-
-
-
-\subsection{Parallelization}
-With the ability to implement a parallel database architecture with %Postgres or 
-Greenplum, we can utilize data parallelism to further optimize queries written
-with {\system}. Each node within the parallel DB could run some query
-over a subset of the data (data parallel). This includes the statistical methods
-in MADLib, which were all built to be data parallel.
-
-In POS tagging of a corpra is an integral task for many 
-textual analytic operations. POS tagging can be performed per-paragraph or 
-per-sentence meaning the process is easily parallelizeable in our queries.
-
-With POS tagging performed we can perform the similarly parallel operation 
-of sentiment analysis.
-Sentiment analysis deals with the study of opinions expressed within text. 
-The sentiment is usually expressed in terms of polarities, where positive
-sentiment refers to the positive nature of the expressed opinion, and negative
+We implemented methods to perform classification such as POS tagging and 
+sentiment analysis at both a document and sentence level.
+%With POS tagging performed we can perform the similarly parallel operation 
+%of sentiment analysis.
+In sentiment analysis we classify text by polarities, where positive
+sentiment refers to the positive nature of the expressed opinion., and negative
 nature for negative sentiment. Much work has already been done in this
 area for document-level and entity-level sentiment \cite{o2010tweets,
 zhang2011combining}. 
-{\system} can apply sentiment analysis at document and sentence level.
+\eat{In POS tagging of a corpora is an integral task for many 
+textual analytic operations. POS tagging can be performed per-paragraph or 
+per-sentence meaning the process can be  parallelizable in our queries.}
+Each text analysis function creates a view we can join with other tables
+and functions within a SQL query, allowing more complex queries to be 
+declaratively realized. 
+
+
+\subsubsection*{Parallelization}
+With a parallel database architecture such as 
+Greenplum, we can parallelize to further optimize queries written
+with {\system}. Each node within the parallel DB could run some query
+over a subset of the data (data parallel). This includes the statistical methods
+in MADLib, which were all built to be data parallel.
+GreenPlum has a parallel shared nothing architecture. Data is loaded onto 
+segments servers. When a query is issued a parallel query optimizer 
+creates a global query plan which is pushed to each of the segment servers.
+Query-driven algorithms can then be executed in parallel over several
+data servers.
 
 
 \subsection{Implementation Details}
@@ -147,7 +142,7 @@ This function produces a table \textit{rfactor} for single state features and a
 table \textit{mfactor} for two state features.
 
 Training the CRF model is a one time task that is performed outside the 
-DBMS \footnote{We use the IIT Bombay package for training available at 
+DBMS\footnote{We use the IIT Bombay package for training available at 
 http://crf.sourceforge.net }.
 We use a small python script to parse and import the trained model into 
 tables in the DBMS. 
@@ -162,7 +157,7 @@ We use the PL/Python language to execute manage the work flow of all the
 calculations.
 The computationally expensive function viterbi is implemented as c-UDFs.
 The feature generation and execution of inference 
-over a table of sentences is implemented in SQL. When executed in GreenPlum 
+over a table of sentences is implemented in {SQL}. When executed in GreenPlum 
 the query is performed in parallel.
 
 
@@ -174,14 +169,24 @@ without losing the ability to drive the work flow using PL/Python.
 
 
 Example \textit{Q0} performs POS tagging for  all the sentences that contain
-the word 'Jaguar'. This query interface allows the user to perform
+the word `Jaguar'. This query interface allows the user to perform
 functions on a subset of the data.
 The \textit{segmenttbl} holds a list of words and their position for each
 document (\textit{doc\_id}). We assume a document is an sequence of characters.
 
 
-
 \begin{small}
+\begin{alltt}
+\textit{Q0: POS tagging on sentences with the word `Jaguars'}
+SELECT DISTINCT ON segtbl.doc_id,
+    viterbi(segtbl.seglist,mfactor.score,rfactor.score)
+FROM segmenttbl, mfactor, rfactor, segtbl
+WHERE segtbl.doc_id = segmenttbl.doc_id 
+    AND segmenttbl.seg_text='Jaguar';
+\end{alltt}
+\end{small}
+
+\eat{\begin{small}
 \begin{alltt}
 \textit{Q0: POS tagging on sentences with the word `Jaguars'}
 SELECT DISTINCT ON segtbl.doc_id,
@@ -195,6 +200,7 @@ WHERE segtbl.doc_id = segmenttbl.doc_id
     AND segmenttbl.seg_text='Jaguar';
 \end{alltt}
 \end{small}
+}
 
 %-----------end new pos section
 
