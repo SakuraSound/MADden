@@ -20,8 +20,9 @@ extracted from various sports media websites. These documents vary in size and
 quality, with some potential out-of domain documents (mainly tweets).
 
 The other tables are more structured,
-including {\tt PlayerStats2011\_*}, with * indicating passing ({\tt Pass}), Receiving ({\tt
-Rec}), Rushing ({\tt Rush}), Special Teams ({\tt ST}), or Defense ({\tt Def}).
+including the {\tt PlayerStats2011} tables\footnote{The * indicates passing ({\tt Pass}),
+Receiving ({\tt Rec}), Rushing ({\tt Rush}), Special Teams ({\tt ST}), or
+Defense ({\tt Def})\label{fn:playerstats}}.
 This data was extracted from the NFL.com player database. Each table contains
 the player's \textit{name}, \textit{position}, \textit{number}, and a series of
 stats corresponding to the stat type (Some players show up in multiple tables, others in only one). The
@@ -40,17 +41,18 @@ extracted entities found in the {\tt NFLCorpus} documents.
 \hline
 \multicolumn{2}{|c|}{Example Schema}\\
 \hline
-$NFLCorpus$ & \textit{doc\_id, type, text, tstmp, tags, \ldots}\\
+$NFLCorpus$ & \textit{doc\_id, type, text, tstmp, tags, }\\
 \hline
-$PlayerStats2011\_*$ & \textit{pid, specific stats\ldots }\\
+$PlayerStats2011\footref{fn:playerstats}$ &
+\textit{pid, type\_specific\_stats\ldots }\\
 \hline
-$Player$ & \textit{pid, f\_name, l\_name, college, \ldots}\\
+$Player$ & \textit{pid, f\_name, l\_name, college, etc}\\
 \hline
-$Team\_Stats2011$ & \textit{team, points, pass\_yds, stats\ldots}\\
+$Team\_Stats2011$ & \textit{team, points, pass\_yds, various\_stats}\\
 \hline
-$Team$ & \textit{team, city, state, stadium, \ldots}\\
+$Team$ & \textit{team, city, state, stadium}\\
 \hline
-$Extracted\_Entities$ & \textit{doc\_id, entity, \ldots} \\
+$Extracted\_Entities$ & \textit{doc\_id, entity} \\
 \hline
 
 \end{tabular}
