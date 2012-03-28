@@ -45,5 +45,5 @@ $BODY$
   LANGUAGE plpythonu VOLATILE
   COST 500
   ROWS 1000;
-ALTER FUNCTION mad_entityfind(text)
+ALTER FUNCTION mad_entityfind(text,boolean)
   OWNER TO "john";
