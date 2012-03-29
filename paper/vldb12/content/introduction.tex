@@ -1,4 +1,5 @@
 
+
 \section{Introduction}
 
 % increasing amounts of unstructured text data
@@ -18,11 +19,11 @@ In such applications, analytics are performed over text data
 from many sources. Text analysis uses 
 statistical machine learning (SML) methods to extract structured
 information, such as part-of-speech tags, entities, relations, 
-sentiments, topics, from
+sentiments, and topics from
 text. The result of the text analysis can be joined with other
-structured data sources to perform analysis. For example, the sports
+structured data sources for more advanced analysis. For example, a sports
 journalist may want to correlate fan sentiment from tweets 
-with stats \ceg{We need to be more specific here}
+with statistics describing the player and team performance
 of the Miami Dolphins\footnote{http://www.miamidolphins.com/}.
 
 \eat{To our knowledge, there is no integrated system with a query
@@ -31,7 +32,7 @@ such ad hoc exploratory queries.}
 To answer such queries, a software
 developer is needed to understand and connect multiple tools,
 including Lucene for text search, Weka or MATLAB for sentiment
-analysis, and a database for joining the structured data with the
+analysis, and a database to joining the structured data with the
 sentiment results. Using such a complex offline batch process to 
 answer a single query
 makes it difficult to ask ad hoc queries over ever-evolving text data. 
@@ -112,17 +113,38 @@ standard SPJ (Select-Project-Join) queries we demonstrate inference
 algorithms using native database techniques. Additionally, we
 implementation is over PostgreSQL and Greenplum parallel databases,
 demonstrating the scalability of our system.}
+
 }
 
 
+{\system} implements four important text analysis functions,  
+including part-of-speech tagging, entity extraction, classification 
+(e.g., sentiment analysis), and entity resolution.
+Text analysis functions are developed on PostgreSQL, 
+a single-threaded database, and Greenplum, a massive parallel 
+processing (MPP) framework. 
+Two SML models and their inference algorithms are adapted: linear-chain 
+CRF and Naive Bayes\cite{Wang:2008:BML:1453856.1453896}. 
+Two types of indexes are used: inverted index and trigram index. 
+In-database and parallel SML algorithms are implemented in Greenplum MPP framework.
+{\system} text analysis library is being integrated into the MADLib
+\footnote{MADLib is an open source project for scalable in-database 
+analytics \url{http://madlib.net}} 
+open-source project.
+The declarative SQL-like query interface with MADden text analysis functions 
+provides a higher-level abstraction. Such an abstraction shields users from 
+detailed text analytic algorithms and enables users to focus more on the 
+application specific data explorations. 
+
+
+
+
+
 In the demonstration of \system, we will show the 
-following points using football journalism as our driving example:
+following points using journalism on the NFL as our driving example:
 \begin{itemize}[noitemsep]
-\item declarative processing of ad hoc queries 
-involving statistical text analysis, such as sentiment analysis,
-information extraction, and entity resolution;
-\item Joining and aggregation between structured and information extracted
-from textual data;
+\item Processing Declarative ad hoc queries involving various statistical text analysis functions;
+\item Joining and querying over multiple data sources with both aggregation structured and text information;
 \item Query-time rendering of visualizations over query results, using 
 word clouds, histograms, and ranked lists of documents.
 \end{itemize}

@@ -1,11 +1,9 @@
 
 \section{System Description}
 
-In this section we first discuss the general architecture the
-spirit behind the implementation of the text analysis algorithms.
-Then we give an example of POS tagging implementation within 
-\system.
-
+In this section we first discuss the general architecture and the
+basic techniques used in the implementation of the text analytics algorithms in {\system}.
+Then we give an example of POS tagging implementation.
 
 \begin{figure}
    \begin{center}
@@ -54,12 +52,36 @@ Dense or sparse array and matrix data structures can be represented
 by specialized types. Operations on these structures can be performed in
 SQL or calculated with calls to highly tuned numeric packages such as LAPACK
 or custom c-UDFs.
-During development of algorithms in MADden or MADLib we take these options 
+During development of algorithms in MADden we take these options 
 into consideration.
 
 Table \ref{tab:madfunct} describes a list of statistical text 
 analysis tasks.
-{\system}.
+
+\begin{table} 
+\begin{center} 
+\begin{tabular}{|l|l|} 
+\hline 
+\multicolumn{2}{|c|}{Functions}\\ 
+\hline 
+$match(object1, object2)$ & Entity Resolution\\ 
+\hline 
+$sentiment(text)$ & Sentiment Analysis\\ 
+\hline 
+$entity\_find(text)$ & Detects Named Entities\\ 
+%\hline 
+%$pos\_tag(text)$ & POS tagging\\ 
+\hline 
+$viterbi$ & Part of speech tags using CRF  \\ 
+%\hline 
+%$pos\_extract(text, type)$ & POS term extraction \\ 
+\hline 
+\end{tabular} 
+\end{center} 
+\caption{Listing of current MADden functions} 
+\label{tab:madfunct} 
+\end{table} 
+
 
 
 \subsection{Statistical Text Analysis Functions}
