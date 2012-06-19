@@ -1,0 +1,241 @@
+
+\section{System Description}
+
+In this section we first discuss the general architecture and the
+basic techniques used in the implementation of the text analytics algorithms in {\system}.
+Then we give an example of POS tagging implementation.
+
+\begin{figure}
+   \begin{center}
+        \includegraphics[scale=0.2]{content/graphics/arch.png}
+        \caption{{\system} architecture}
+        \label{fig:arch}
+   \end{center}
+\end{figure}
+    
+\subsection{System Architecture}
+
+{\system} is a four layered system, as can be seen in Figure \ref{fig:arch}.
+The user interface is where both naive and advanced users can construct queries over
+text, structured data, and models. From the user interface, queries are then passed to the
+DBMS, where both MADLib and {\system} libraries sit on top of the query processor to
+add statistical and text processing functionality. 
+It is important to emphasize that MADlib and {\system} perform functions
+at the same logical layer.  These queries are processed using 
+PostgreSQL and Greenplum's Parallel DB architecture to further optimize on 
+replicated storage and parallel query optimization. 
+
+
+%\subsection{{\system} Implementation}
+
+
+
+% -------------------------------------------- Rewrite
+
+
+
+
+% All new stuff-------------% -------------% ----------------
+%\subsection{In-datbase Implementation}
+To enable text analytics, {\system} works alongside statistical
+functions found in the MADlib library \cite{hellerstein2012madlib}.
+The implemented algorithms are developed to take advantage of the 
+architecture and features of the DBMS\. 
+The algorithms are first implemented in SQL or PL/pgSQL, as this language
+exposes the execution pipeline to the query optimizer. 
+SQL excels in first-order logic operations performed in batch.
+If many loops and complicated data flows are involved, we use the PL/Python 
+scripting language to control the execution.
+We can use Python to make decisions to aid the query optimizer in algorithm
+decision.
+Dense or sparse array and matrix data structures can be represented
+by specialized types. Operations on these structures can be performed in
+SQL or calculated with calls to highly tuned numeric packages such as LAPACK
+or custom c-UDFs.
+\eat{During development of algorithms in MADden we take these options 
+into consideration.}
+
+
+\begin{table} 
+\begin{center} 
+\begin{tabular}{|l|l|} 
+\hline 
+\multicolumn{2}{|c|}{Functions}\\ 
+\hline 
+$match(object1, object2)$ & Entity Resolution\\ 
+\hline 
+$sentiment(text)$ & Sentiment Analysis\\ 
+\hline 
+$entity\_find(text)$ & Detects Named Entities\\ 
+%\hline 
+%$pos\_tag(text)$ & POS tagging\\ 
+\hline 
+$viterbi$ & Part of speech tags using CRF  \\ 
+%\hline 
+%$pos\_extract(text, type)$ & POS term extraction \\ 
+\hline 
+\end{tabular} 
+\end{center} 
+\caption{Listing of current MADden functions} 
+\label{tab:madfunct} 
+\end{table} 
+
+
+
+\subsection{Statistical Text Analysis Functions}
+
+In this section we describe various text analysis algorithms.
+Many approaches exist for in-database information extraction. 
+We build on our previous work using Conditional Random Fields (CRFs) for 
+query-time information extraction \cite{wang2011hybrid}.
+We perform the extraction and the inference inside of the database. 
+We rely on information
+provided in the query to make decision on the type of algorithm used 
+for extraction. 
+Table~\ref{tab:madfunct} describes a list of statistical text 
+analysis tasks.
+
+Entity resolution or co-reference resolution is the problem where given any two
+mentions of a name, the are clustered only if they refer to the same real 
+world entity. 
+\eat{This problem is difficult because you can have mentions that are
+spelled the same but refer to different entities and conversely we different
+spelling that may refer to the same entity.}
+Certain entities may be misrepresented by the presence of different names, 
+misspellings in the text, or aliases. It is important to
+resolve these entities appropriately to better understand the data. Increasingly
+informal text, such as blog posts and tweets requires entity resolution. 
+\eat{{\system} use inverted indices within the database to perform text
+analysis on documents.We can scan the inverted indices of each 
+document, filtering out documents that do not contain instances of the player names.}
+To handle misspellings and nicknames we use trigram indices to perform 
+approximate matches of searches for names as database queries 
+\cite{Jain:2009:BQO:1519103.1519108}. 
+This method allows us to use indices to perform queries on only the relevant
+portions of the data set, this way we do no extra processing.
+
+We implemented functions to perform classification tasks such as POS tagging and 
+sentiment analysis. These functions work at both a document and sentence level.
+%With POS tagging performed we can perform the similarly parallel operation 
+%of sentiment analysis.
+In sentiment analysis we classify text by polarities, where positive
+sentiment refers to the positive nature of the expressed opinion., and negative
+nature for negative sentiment. Much work has already been done in this
+area for document-level and entity-level sentiment \cite{o2010tweets,
+zhang2011combining}. 
+\eat{In POS tagging of a corpora is an integral task for many 
+textual analytic operations. POS tagging can be performed per-paragraph or 
+per-sentence meaning the process can be  parallelizable in our queries.}
+\eat{Each text analysis function creates a view we} We can join with other tables
+and functions within a SQL query, allowing more complex queries to be 
+declaratively realized. 
+
+
+\subsubsection*{Parallelization}
+With a parallel database architecture such as 
+Greenplum, we can parallelize to further optimize queries written
+with {\system}. Each node within the parallel DB could run some query
+over a subset of the data (data parallel). This includes the statistical methods
+in MADLib, which were all built to be data parallel.
+Greenplum has a parallel shared nothing architecture. Data is loaded onto 
+segments servers. When a query is issued a parallel query optimizer 
+creates a global query plan which is pushed to each of the segment servers.
+Query-driven algorithms can then be executed in parallel over several
+data servers.
+
+
+\subsection{Implementation Details}
+\label{sec:impdis}
+
+%%%---------new pos section
+
+Core to many natural language processing tasks, POS involves the
+labeling of terms within text based on their function in a particular sentence.
+We implemented POS tagging in PostgreSQL and Greenplum. 
+Our code is apart of the MADLib open source system.
+\eat{We are
+committing our code to MADLib and it is in under review.}
+
+\system uses first-order chain CRF to model the labeling
+of a sequence of tokens. The factor graph has observed nodes on each sentence
+token, latent label variables attached to each token.
+%Factors are only associated with one node at the beginning and end of the chain.
+%All other factors are pairwise.  
+Factors are function that connect two nodes or signify the ends of the chain.
+We generate the features using a function \textit{generatemrtbl}. 
+This function produces a table \textit{rfactor} for single state features and a 
+table \textit{mfactor} for two state features.
+
+Training the CRF model is a one time task that is performed outside the 
+DBMS\footnote{We use the IIT Bombay package for training available at 
+http://crf.sourceforge.net }.
+We use a python script to parse and import the trained model into 
+tables in the DBMS. 
+
+Inference is performed over the stored models in order to find the highest 
+assignment of labels in the model.
+We calculate the top 1 most probable label assignment. This is calculated using
+the Viterbi dynamic programming algorithm over the label space.
+
+
+We use the PL/Python language to execute manage the work flow of all the 
+calculations.
+The computationally expensive function viterbi is implemented as c-UDFs.
+The feature generation and execution of inference 
+over a table of sentences is implemented in {SQL}. When executed in Greenplum 
+the query is performed in parallel.
+
+
+Implementing POS tagging inside the DBMS allows us to perform inference over a 
+subset of tokens in response to a query instead of performing batch tagging over 
+all tokens.
+We also get the benefit of using the query engine to parallelize our queries
+without losing the ability to drive the work flow using PL/Python.
+
+
+Example \textit{Q0} performs POS tagging for  all the sentences that contain
+the word `Jaguar'. This query interface allows the user to perform
+functions on a subset of the data.
+The \textit{segmenttbl} holds a list of tokens and their position for each
+document (\textit{doc\_id}). We assume a document is a sequence of tokens.
+
+
+\begin{small}
+\begin{alltt}
+\textit{Q0: POS tagging on sentences with the word `Jaguars'}
+SELECT DISTINCT ON segtbl.doc_id,
+    viterbi(segtbl.seglist,mfactor.score,rfactor.score)
+FROM segmenttbl, mfactor, rfactor, segtbl
+WHERE segtbl.doc_id = segmenttbl.doc_id 
+    AND segmenttbl.seg_text='Jaguar';
+\end{alltt}
+\end{small}
+
+\eat{\begin{small}
+\begin{alltt}
+\textit{Q0: POS tagging on sentences with the word `Jaguars'}
+SELECT DISTINCT ON segtbl.doc_id,
+    viterbi(segtbl.seglist,mfactor.score,rfactor.score)
+FROM segmenttbl, mfactor, rfactor, 
+    (SELECT doc_id, array_agg(seg_id ORDER BY start_pos)
+			AS seglist
+     FROM segtbl 
+     GROUP BY doc_id) AS segtbl
+WHERE segtbl.doc_id = segmenttbl.doc_id 
+    AND segmenttbl.seg_text='Jaguar';
+\end{alltt}
+\end{small}
+}
+
+%-----------end new pos section
+
+
+
+
+
+
+
+
+
+
+

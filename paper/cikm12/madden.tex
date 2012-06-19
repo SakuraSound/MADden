@@ -1,0 +1,61 @@
+\documentclass{sig-alternate}
+%\documentclass{vldb}
+
+\usepackage{listings}
+\usepackage{color}
+\usepackage{xspace}
+\usepackage{ulem}
+\usepackage{alltt}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{footmisc}
+
+\newcommand{\ceg}[1]{{\textcolor{blue}{#1 -- CEG}}}
+\newcommand{\jag}[1]{{\textcolor{red}{#1 -- JAG}}}
+\newcommand{\dzw}[1]{{\textcolor{magenta}{#1 -- DZW}}}
+\newcommand{\system}{MADden\xspace}
+
+\newtheorem{ex}{Example}
+
+\newcommand{\eat}[1]{}
+
+\begin{document}
+
+\title{\system: Query-Driven Statistical Text Analytics}
+\subtitle{A Case Study in Computational Journalism}
+
+
+\author{Christan Grant, Joir-dan Gumbs, Kun Li, Daisy Zhe Wang \\
+    University of Florida, Dept\. of Computer Science \\
+    Gainesville, Florida, USA \\
+    \{cgrant, jgumbs, kli, daisyw\} @cise.ufl.edu
+}
+
+
+
+
+\maketitle
+
+\input{content/abstract.tex}
+
+\input{content/introduction.tex}
+
+\input{content/systemdescription.tex}
+
+%\input{content/comparison.tex}
+
+\input{content/new_systemdemonstration.tex}
+
+\input{content/relatedwork.tex}
+
+%\input{content/}
+\section{Acknowledgments}
+We would like to thank Morgan Bauer for his work in building this system.
+Christan Grant is funded by an NSF Graduate Research Fellowship.
+
+\bibliographystyle{abbrv}
+\begin{small}
+\bibliography{citation}
+\end{small}
+
+\end{document}

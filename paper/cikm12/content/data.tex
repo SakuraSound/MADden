@@ -1,0 +1,26 @@
+\section{Datasets}
+The data is represented by the abbreviated schema\footnote{These tables may be
+extracted to an RDBMS beforehand, or defined over an API
+using a foreign data wrapper (fdw).} shown in Table \ref{tab:schema}.
+The {\tt NFLCorpus} table holds documents crawled from the web,
+and tweets extracted from the Twitter Streaming API. This table contains
+millions of documents, varying in size and quality. The type of document 
+can be specified via the type attribute. The types include `news', `blogs' or
+`tweets'. The \textit{entry} attribute of {\tt NFLCorpus} contains the text data.
+The other tables are structured but the data may contain duplicates or
+misspelled terms. It is also possible for these documents to be out of domain.
+The {\tt Players} table is a list of individuals
+who play in the NFL. The player data is obtained from NFL.com
+The {\tt PlayerStats} table has a \textit{position} field that specifies
+the type of statistic that is inside of the \textit{stats} column.
+The {\tt PlayerAlias} table list alternative names for players.
+While this list may be obtained using topic modeling or word
+co-occurrence, we hand coded a list of alias names for a select
+group of well-known players. This helps in resolving players who are
+referred to by their nickname, `Sticky Fingers', in the case of
+`Larry Fitzgerald'.
+The {\tt Teams} table holds all the team
+names in the NFL and the {\tt TeamAlias} table has the alternate names for these
+teams. ``ARI'' as an abbreviation,  and ``Football Cardinals'' as a nickname, are 
+example entries in this table. {\tt GameStats} contains the amount of points scored by a 
+home and away team for each NFL game played.\\
