@@ -15,13 +15,16 @@ Then we give an example of POS tagging implementation.
     
 \subsection{System Architecture}
 
-{\system} is a four layered system, as can be seen in Figure \ref{fig:arch}.
+{\system} is a four layered system, as can be seen in Figure~\ref{fig:arch}.
 The user interface is where both naive and advanced users can construct queries over
 text, structured data, and models. From the user interface, queries are then passed to the
 DBMS, where both MADLib and {\system} libraries sit on top of the query processor to
 add statistical and text processing functionality. 
 It is important to emphasize that MADlib and {\system} perform functions
-at the same logical layer.  These queries are processed using 
+at the same logical layer.  
+To enable text analytics, {\system} works alongside statistical
+functions found in the MADlib library \cite{hellerstein2012madlib}.
+These queries are processed using 
 PostgreSQL and Greenplum's Parallel DB architecture to further optimize on 
 replicated storage and parallel query optimization. 
 
@@ -37,7 +40,7 @@ replicated storage and parallel query optimization.
 
 % All new stuff-------------% -------------% ----------------
 %\subsection{In-datbase Implementation}
-To enable text analytics, {\system} works alongside statistical
+\eat{To enable text analytics, {\system} works alongside statistical
 functions found in the MADlib library \cite{hellerstein2012madlib}.
 The implemented algorithms are developed to take advantage of the 
 architecture and features of the DBMS\. 
@@ -51,7 +54,7 @@ decision.
 Dense or sparse array and matrix data structures can be represented
 by specialized types. Operations on these structures can be performed in
 SQL or calculated with calls to highly tuned numeric packages such as LAPACK
-or custom c-UDFs.
+or custom c-UDFs.}
 \eat{During development of algorithms in MADden we take these options 
 into consideration.}
 

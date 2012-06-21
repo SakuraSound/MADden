@@ -48,17 +48,17 @@ on the result of previous queries.
 
 
 
-{\system} implements four important text analysis functions,  
-including part-of-speech tagging, entity extraction, classification 
+{\system} implements four important text analysis functions, namely  
+part-of-speech tagging, entity extraction, classification 
 (e.g., sentiment analysis), and entity resolution.
 Text analysis functions are developed on PostgreSQL, 
 a single-threaded database, and Greenplum, a massive parallel 
 processing (MPP) framework. 
 Two SML models and their inference algorithms are adapted: linear-chain 
 CRF and Naive Bayes\cite{Wang:2008:BML:1453856.1453896}. 
-Two types of indexes are used: inverted index and trigram index. 
+\eat{Two types of indexes are used: inverted index and trigram index.} 
 In-database and parallel SML algorithms are implemented in Greenplum MPP framework.
-{\system} text analytic library is being integrated into the MADLib
+{\system} text analytic library is integrated into the MADLib
 open-source project\footnote{MADLib is an open source project for scalable in-database 
 analytics \url{http://madlib.net}}.
 The declarative SQL query interface with MADden text analysis functions 
@@ -71,7 +71,7 @@ application specific data explorations.
 In the demonstration of \system, we will show the 
 following points using journalism on the NFL as our driving example:
 \begin{itemize}[noitemsep]
-\item Processing Declarative ad hoc queries involving various statistical text analytic functions;
+\item Processing declarative ad hoc queries involving various statistical text analytic functions;
 \item Joining and querying over multiple data sources with both aggregation structured and text information;
 \item Query-time rendering of visualizations over query results, using 
 word clouds, histograms, and ranked lists of documents.
