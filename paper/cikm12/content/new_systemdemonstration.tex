@@ -27,12 +27,13 @@ news articles, and fan tweets, with document metadata such as timestamp, tags,
 type, among others. The tweets were extracted using the Twitter Streaming API\footnote{\url{https://dev.twitter.com/docs/streaming-apis}}
 with a series of NFL related keywords, and the news articles and blogs were
 extracted from various sports media websites. These documents vary in size and
-quality, with some potential out-of domain documents (mainly tweets).
+quality. We have around 25 million of tweets from the 2011 NFL season, plays and recaps from 
+every game in the season.
 
 The other tables are more structured,
-including the {\tt PlayerStats2011} tables\footnote{The * indicates passing ({\tt Pass}),
-Receiving ({\tt Rec}), Rushing ({\tt Rush}), Special Teams ({\tt ST}), or
-Defense ({\tt Def})\label{fn:playerstats}}.
+including the {\tt PlayerStats2011} tables%\footnote{The * indicates passing ({\tt Pass}),
+%Receiving ({\tt Rec}), Rushing ({\tt Rush}), Special Teams ({\tt ST}), or
+%Defense ({\tt Def})\label{fn:playerstats}}.
 This data was extracted from the NFL.com player database. Each table contains
 the player's \textit{name}, \textit{position}, \textit{number}, and a series of
 stats corresponding to the stat type (Some players show up in multiple tables, others in only one). The
@@ -113,6 +114,7 @@ $pos\_extract(text, type)$ & POS term extraction \\
 \end{table}
 }
 
+}
 \begin{table}
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -121,8 +123,9 @@ $pos\_extract(text, type)$ & POS term extraction \\
 \hline
 $NFLCorpus$ & \textit{doc\_id, type, text, tstmp, tags, }\\
 \hline
-$PlayerStats2011\footref{fn:playerstats}$ &
-\textit{pid, type\_specific\_stats\ldots }\\
+$PlayerStats2011 %\footref{fn:playerstats}
+$ &
+\textit{pid, type\_specific\_stats }\\
 \hline
 $Player$ & \textit{pid, f\_name, l\_name, college, etc}\\
 \hline
@@ -140,11 +143,7 @@ $Extracted\_Entities$ & \textit{doc\_id, entity} \\
 \end{table}
 
 
-
-
-
-
-
+\eat{
 
 Journalist may want to explore fan sentiment for the Jacksonville Jaguars
 based on tweets collected during the NFL season. Utilizing the first 
