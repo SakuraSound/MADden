@@ -93,13 +93,13 @@ We build on our previous work using Conditional Random Fields (CRFs) for
 query-time information extraction \cite{wang2011hybrid}.
 We perform the extraction and the inference inside of the database. 
 We rely on information
-provided in the query to make decision on the type of algorithm used 
+provided in the query to make decisions on the type of algorithm used 
 for extraction. 
 Table~\ref{tab:madfunct} describes a list of statistical text 
 analysis tasks.
 
 Entity resolution or co-reference resolution is the problem where given any two
-mentions of a name, the are clustered only if they refer to the same real 
+mentions of a name, they are clustered only if they refer to the same real 
 world entity. 
 \eat{This problem is difficult because you can have mentions that are
 spelled the same but refer to different entities and conversely we different
@@ -115,7 +115,7 @@ To handle misspellings and nicknames we use trigram indices to perform
 approximate matches of searches for names as database queries 
 \cite{Jain:2009:BQO:1519103.1519108}. 
 This method allows us to use indices to perform queries on only the relevant
-portions of the data set, this way we do no extra processing.
+portions of the data set; this way we do no extra processing.
 
 We implemented functions to perform classification tasks such as POS tagging and 
 sentiment analysis. These functions work at both a document and sentence level.
@@ -141,7 +141,7 @@ with {\system}. Each node within the parallel DB could run some query
 over a subset of the data (data parallel). This includes the statistical methods
 in MADLib, which were all built to be data parallel.
 Greenplum has a parallel shared nothing architecture. Data is loaded onto 
-segments servers. When a query is issued a parallel query optimizer 
+segment servers. When a query is issued, a parallel query optimizer 
 creates a global query plan which is pushed to each of the segment servers.
 Query-driven algorithms can then be executed in parallel over several
 data servers.
@@ -155,16 +155,16 @@ data servers.
 Core to many natural language processing tasks, POS involves the
 labeling of terms within text based on their function in a particular sentence.
 We implemented POS tagging in PostgreSQL and Greenplum. 
-Our code is apart of the MADLib open source system.
+Our code is a apart of the MADLib open source system.
 \eat{We are
 committing our code to MADLib and it is in under review.}
 
 \system uses first-order chain CRF to model the labeling
 of a sequence of tokens. The factor graph has observed nodes on each sentence
-token, latent label variables attached to each token.
+token, with latent label variables attached to each token.
 %Factors are only associated with one node at the beginning and end of the chain.
 %All other factors are pairwise.  
-Factors are function that connect two nodes or signify the ends of the chain.
+Factors are functions that connect two nodes or signify the ends of the chain.
 We generate the features using a function \textit{generatemrtbl}. 
 This function produces a table \textit{rfactor} for single state features and a 
 table \textit{mfactor} for two state features.
@@ -181,9 +181,9 @@ We calculate the top 1 most probable label assignment. This is calculated using
 the Viterbi dynamic programming algorithm over the label space.
 
 
-We use the PL/Python language to execute manage the work flow of all the 
+We use the PL/Python language to manage the work flow of all the 
 calculations.
-The computationally expensive function viterbi is implemented as c-UDFs.
+The computationally expensive function viterbi is implemented as database user-defined functions in the C language.
 The feature generation and execution of inference 
 over a table of sentences is implemented in {SQL}. When executed in Greenplum 
 the query is performed in parallel.

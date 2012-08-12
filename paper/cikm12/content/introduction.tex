@@ -31,8 +31,8 @@ interface that enables domain experts (e.g., journalists) to issues
 such ad hoc exploratory queries.}
 To answer such queries, a software
 developer is needed to understand and connect multiple tools,
-including Lucene for text search, Weka or MATLAB for sentiment
-analysis, and a database to joining the structured data with the
+including Lucene for text search, Weka or R for sentiment
+analysis, and a database to join the structured data with the
 sentiment results. Using such a complex offline batch process to 
 answer a single query
 makes it difficult to ask ad hoc queries over ever-evolving text data. 
@@ -55,7 +55,10 @@ Text analysis functions are developed on PostgreSQL,
 a single-threaded database, and Greenplum, a massive parallel 
 processing (MPP) framework. 
 Two SML models and their inference algorithms are adapted: linear-chain 
-CRF and Naive Bayes\cite{Wang:2008:BML:1453856.1453896}. 
+Conditional Random Fields (CRF)
+\footnote{A CRF is a discriminative probabilistic graphical model used to encode
+arbitrary relationships for statistical processing.} 
+and Naive Bayes\cite{Wang:2008:BML:1453856.1453896}. 
 \eat{Two types of indexes are used: inverted index and trigram index.} 
 In-database and parallel SML algorithms are implemented in Greenplum MPP framework.
 {\system} text analytic library is integrated into the MADLib

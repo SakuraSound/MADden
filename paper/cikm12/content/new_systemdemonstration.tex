@@ -27,14 +27,13 @@ news articles, and fan tweets, with document metadata such as timestamp, tags,
 type, among others. The tweets were extracted using the Twitter Streaming API\footnote{\url{https://dev.twitter.com/docs/streaming-apis}}
 with a series of NFL related keywords, and the news articles and blogs were
 extracted from various sports media websites. These documents vary in size and
-quality. We have around 25 million of tweets from the 2011 NFL season, plays and recaps from 
+quality. We have around 25 million tweets from the 2011 NFL season, including plays and recaps from 
 every game in the season.
 
-The other tables are more structured,
-including the {\tt PlayerStats2011} tables%\footnote{The * indicates passing ({\tt Pass}),
+ %\footnote{The * indicates passing ({\tt Pass}),
 %Receiving ({\tt Rec}), Rushing ({\tt Rush}), Special Teams ({\tt ST}), or
 %Defense ({\tt Def})\label{fn:playerstats}}.
-This data was extracted from the NFL.com player database. Each table contains
+The statistical data was extracted from the NFL.com player database. Each table contains
 the player's \textit{name}, \textit{position}, \textit{number}, and a series of
 stats corresponding to the stat type (Some players show up in multiple tables, others in only one). The
 {\tt Player} table holds information about a player in the NFL, including
@@ -121,7 +120,7 @@ $pos\_extract(text, type)$ & POS term extraction \\
 \hline
 \multicolumn{2}{|c|}{Example Schema}\\
 \hline
-$NFLCorpus$ & \textit{doc\_id, type, text, tstmp, tags, }\\
+$NFLCorpus$ & \textit{doc\_id, type, text, tstmp, tags }\\
 \hline
 $PlayerStats2011 %\footref{fn:playerstats}
 $ &
